@@ -1,0 +1,7 @@
+{
+    "name": "geonode-catalog",
+    "private": true,
+    "dependencies": {
+        "@open-pioneer/http": "catalog:"
+    }
+}
