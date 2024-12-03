@@ -5,6 +5,14 @@ import { defineBuildConfig } from "@open-pioneer/build-support";
 export default defineBuildConfig({
     i18n: ["en"],
     ui: {
-        references: ["sample-package.Greeter", "geonode-catalog.CatalogService"]
+        references: ["sample-package.Greeter", "SearchService"]
+    },
+    services: {
+        SearchServiceImpl: {
+            provides: "SearchService",
+            references: {
+                catalogService: "geonode-catalog.CatalogService"
+            }
+        }
     }
 });

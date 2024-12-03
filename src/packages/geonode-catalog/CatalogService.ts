@@ -3,7 +3,10 @@
 import { DeclaredService } from "@open-pioneer/runtime";
 
 export interface SearchResultEntry {
+    uuid: string;
     title: string;
+    imageUrl?: string;
+    abstract: string;
 }
 
 export interface SearchResponse {
