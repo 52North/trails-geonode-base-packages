@@ -7,24 +7,31 @@ import { useReactiveSnapshot } from "@open-pioneer/reactivity";
 import { Box, Center, Container, Progress, VStack } from "@open-pioneer/chakra-integration";
 import { SearchInput } from "./SearchInput";
 import { ResultEntry } from "./ResultEntry";
+import { PageSizeSelection } from "./PageSizeSelection";
+import { InfinitePageLoad } from "./InfinitePageLoad";
 
 export function SearchView() {
     const searchSrvc = useService<SearchService>("SearchService");
-    const [result, loading] = useReactiveSnapshot(
-        () => [searchSrvc.result, searchSrvc.searching],
+    const [results, loading, resultCount] = useReactiveSnapshot(
+        () => [searchSrvc.results, searchSrvc.searching, searchSrvc.resultCount],
         [searchSrvc]
     );
 
     return (
         <Container maxW="6xl">
-            <SearchInput></SearchInput>
-            {loading && <Progress size="xs" isIndeterminate />}
-            <Center>{result && <Box>{result.count} Results found</Box>}</Center>
+            <VStack gap="10px" align="stretch">
+                <SearchInput></SearchInput>
+                {loading ? <Progress size="xs" isIndeterminate /> : <Box height="4px"></Box>}
+                <Center gap={2}>
+                    <Box>{<Box>{resultCount} Results found</Box>}</Box>
+                    <PageSizeSelection></PageSizeSelection>
+                </Center>
 
-            <VStack>
-                {result?.results?.map((e) => (
-                    <ResultEntry key={e.uuid} resultEntry={e}></ResultEntry>
-                ))}
+                <VStack>
+                    {results?.map((e) => <ResultEntry key={e.uuid} resultEntry={e}></ResultEntry>)}
+                </VStack>
+
+                <InfinitePageLoad></InfinitePageLoad>
             </VStack>
         </Container>
     );

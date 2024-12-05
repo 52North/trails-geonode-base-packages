@@ -16,6 +16,8 @@ export interface SearchResponse {
 
 export interface SearchFilter {
     searchTerm?: string;
+    pageSize?: number;
+    page?: number;
 }
 
 export interface CatalogService extends DeclaredService<"geonode-catalog.CatalogService"> {

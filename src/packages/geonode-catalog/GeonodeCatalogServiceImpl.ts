@@ -27,11 +27,18 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
 
         if (filter.searchTerm) {
             params.set("search", filter.searchTerm);
+            params.append("search_fields", "title");
+            params.append("search_fields", "abstract");
         }
 
-        params.append("search_fields", "title");
-        params.append("search_fields", "abstract");
-        params.set("page_size", "20");
+        if (filter.pageSize !== undefined) {
+            params.set("page_size", `${filter.pageSize}`);
+        }
+
+        if (filter.page !== undefined) {
+            params.set("page", `${filter.page}`);
+        }
+
         const fetchUrl = `${url}resources?${params}`;
 
         return this.httpService

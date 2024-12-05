@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { Reactive, reactive } from "@conterra/reactivity-core";
 import { DeclaredService, ServiceOptions } from "@open-pioneer/runtime";
-import { CatalogService, SearchFilter, SearchResponse } from "geonode-catalog";
+import { CatalogService, SearchFilter, SearchResponse, SearchResultEntry } from "geonode-catalog";
 import { API_URL } from "./constants";
 
 interface References {
@@ -11,8 +11,12 @@ interface References {
 
 export interface SearchService extends DeclaredService<"SearchService"> {
     searching: boolean;
-    result: SearchResponse | null;
+    results: SearchResultEntry[] | undefined;
+    resultCount: number;
+    currentFilter: SearchFilter;
+    set pageSize(pageSize: number);
     set searchTerm(v: string);
+    addNextPage(): void;
 }
 
 export class SearchServiceImpl implements SearchService {
@@ -20,9 +24,14 @@ export class SearchServiceImpl implements SearchService {
 
     #searching: Reactive<boolean> = reactive(false);
 
-    #result: Reactive<SearchResponse | null> = reactive(null);
+    #results: Reactive<SearchResultEntry[] | undefined> = reactive();
 
-    #currentFilter: SearchFilter = {};
+    #resultCount: Reactive<number> = reactive(0);
+
+    #currentFilter: SearchFilter = {
+        pageSize: 5,
+        page: 1
+    };
 
     constructor(serviceOptions: ServiceOptions<References>) {
         this.catalogSrvc = serviceOptions.references.catalogService;
@@ -33,8 +42,16 @@ export class SearchServiceImpl implements SearchService {
         return this.#searching.value;
     }
 
-    get result(): SearchResponse | null {
-        return this.#result.value;
+    get results(): SearchResultEntry[] | undefined {
+        return this.#results.value;
+    }
+
+    get resultCount(): number {
+        return this.#resultCount.value;
+    }
+
+    get currentFilter(): SearchFilter {
+        return this.#currentFilter;
     }
 
     set searchTerm(term: string) {
@@ -42,13 +59,35 @@ export class SearchServiceImpl implements SearchService {
         this.triggerSearch();
     }
 
-    private triggerSearch() {
+    set pageSize(pageSize: number) {
+        this.#currentFilter.pageSize = pageSize;
+        this.triggerSearch();
+    }
+
+    addNextPage(): void {
+        console.log("start loading next page");
+        if (!this.#searching.value && this.#currentFilter.page !== undefined) {
+            this.#currentFilter.page = this.#currentFilter.page + 1;
+            this.triggerSearch(true);
+        }
+    }
+
+    private triggerSearch(appendResults: boolean = false) {
         this.#searching.value = true;
-        this.#result.value = null;
+        if (!appendResults) {
+            this.#results.value = undefined;
+        }
         const url = API_URL;
         this.catalogSrvc.startSearch(url, this.#currentFilter).then((res) => {
             console.log(`Search results ${res.count}`);
-            this.#result.value = res;
+            if (appendResults && this.#results.value && res.results) {
+                this.#results.value = this.#results.value.concat(res.results);
+            } else {
+                this.#results.value = res.results;
+            }
+            if (res.count !== undefined) {
+                this.#resultCount.value = res.count;
+            }
             this.#searching.value = false;
         });
     }
