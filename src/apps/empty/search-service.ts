@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { Reactive, reactive } from "@conterra/reactivity-core";
 import { DeclaredService, ServiceOptions } from "@open-pioneer/runtime";
-import { CatalogService, OrderOption, SearchFilter, SearchResultEntry } from "geonode-catalog";
+import { CatalogService, OrderOption, SearchFilter, SearchResultEntry } from "catalog";
 import { API_URL } from "./constants";
 
 interface References {

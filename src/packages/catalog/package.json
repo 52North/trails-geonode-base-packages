@@ -1,0 +1,7 @@
+{
+    "name": "catalog",
+    "private": true,
+    "dependencies": {
+        "@open-pioneer/runtime": "catalog:"
+    }
+}

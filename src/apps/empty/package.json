@@ -6,6 +6,7 @@
         "@open-pioneer/runtime": "catalog:",
         "@open-pioneer/reactivity": "catalog:",
         "sample-package": "workspace:^",
-        "geonode-catalog": "workspace:^"
+        "geonode-catalog": "workspace:^",
+        "catalog": "workspace:^"
     }
 }

@@ -5,7 +5,7 @@ import { Box, Select } from "@open-pioneer/chakra-integration";
 import { SearchService } from "../search-service";
 import { useService } from "open-pioneer:react-hooks";
 import { ChangeEvent, useEffect, useState } from "react";
-import { OrderOption } from "geonode-catalog";
+import { OrderOption } from "catalog";
 import { useReactiveSnapshot } from "@open-pioneer/reactivity";
 
 export function Ordering() {

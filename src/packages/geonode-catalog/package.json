@@ -2,6 +2,7 @@
     "name": "geonode-catalog",
     "private": true,
     "dependencies": {
-        "@open-pioneer/http": "catalog:"
+        "@open-pioneer/http": "catalog:",
+        "catalog": "workspace:^"
     }
 }

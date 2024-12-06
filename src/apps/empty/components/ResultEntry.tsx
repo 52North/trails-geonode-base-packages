@@ -11,7 +11,7 @@ import {
     Text,
     Box
 } from "@open-pioneer/chakra-integration";
-import { SearchResultEntry } from "geonode-catalog";
+import { SearchResultEntry } from "catalog";
 
 export function ResultEntry(props: { resultEntry: SearchResultEntry }) {
     const { resultEntry } = props;

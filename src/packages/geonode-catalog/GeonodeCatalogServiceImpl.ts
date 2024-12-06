@@ -6,7 +6,7 @@ import {
     SearchFilter,
     SearchResponse,
     SearchResultEntry
-} from "./CatalogService";
+} from "catalog";
 import type { ServiceOptions } from "@open-pioneer/runtime";
 import { HttpService } from "@open-pioneer/http";
 
