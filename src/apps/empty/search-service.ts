@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { Reactive, reactive } from "@conterra/reactivity-core";
 import { DeclaredService, ServiceOptions } from "@open-pioneer/runtime";
-import { CatalogService, SearchFilter, SearchResponse, SearchResultEntry } from "geonode-catalog";
+import { CatalogService, OrderOption, SearchFilter, SearchResultEntry } from "geonode-catalog";
 import { API_URL } from "./constants";
 
 interface References {
@@ -16,7 +16,9 @@ export interface SearchService extends DeclaredService<"SearchService"> {
     currentFilter: SearchFilter;
     set pageSize(pageSize: number);
     set searchTerm(v: string);
+    set order(order: OrderOption);
     addNextPage(): void;
+    getOrderOptions(): Promise<OrderOption[]>;
 }
 
 export class SearchServiceImpl implements SearchService {
@@ -64,12 +66,21 @@ export class SearchServiceImpl implements SearchService {
         this.triggerSearch();
     }
 
+    set order(order: OrderOption) {
+        this.#currentFilter.order = order;
+        this.triggerSearch();
+    }
+
     addNextPage(): void {
         console.log("start loading next page");
         if (!this.#searching.value && this.#currentFilter.page !== undefined) {
             this.#currentFilter.page = this.#currentFilter.page + 1;
             this.triggerSearch(true);
         }
+    }
+
+    getOrderOptions(): Promise<OrderOption[]> {
+        return this.catalogSrvc.getOrderOptions();
     }
 
     private triggerSearch(appendResults: boolean = false) {

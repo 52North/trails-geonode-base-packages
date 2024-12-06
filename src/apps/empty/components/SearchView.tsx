@@ -9,6 +9,7 @@ import { SearchInput } from "./SearchInput";
 import { ResultEntry } from "./ResultEntry";
 import { PageSizeSelection } from "./PageSizeSelection";
 import { InfinitePageLoad } from "./InfinitePageLoad";
+import { Ordering } from "./Ordering";
 
 export function SearchView() {
     const searchSrvc = useService<SearchService>("SearchService");
@@ -25,10 +26,11 @@ export function SearchView() {
                 <Center gap={2}>
                     <Box>{<Box>{resultCount} Results found</Box>}</Box>
                     <PageSizeSelection></PageSizeSelection>
+                    <Ordering></Ordering>
                 </Center>
 
                 <VStack>
-                    {results?.map((e) => <ResultEntry key={e.uuid} resultEntry={e}></ResultEntry>)}
+                    {results?.map((e) => <ResultEntry key={e.id} resultEntry={e}></ResultEntry>)}
                 </VStack>
 
                 <InfinitePageLoad></InfinitePageLoad>

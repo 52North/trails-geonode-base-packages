@@ -3,7 +3,7 @@
 import { DeclaredService } from "@open-pioneer/runtime";
 
 export interface SearchResultEntry {
-    uuid: string;
+    id: string;
     title: string;
     imageUrl?: string;
     abstract: string;
@@ -14,12 +14,19 @@ export interface SearchResponse {
     results?: SearchResultEntry[];
 }
 
+export interface OrderOption {
+    key: string;
+    label: string;
+}
+
 export interface SearchFilter {
     searchTerm?: string;
     pageSize?: number;
     page?: number;
+    order?: OrderOption;
 }
 
 export interface CatalogService extends DeclaredService<"geonode-catalog.CatalogService"> {
     startSearch(url: string, filter: SearchFilter): Promise<SearchResponse>;
+    getOrderOptions(): Promise<OrderOption[]>;
 }
