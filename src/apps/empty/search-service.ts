@@ -2,7 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 import { Reactive, reactive } from "@conterra/reactivity-core";
 import { DeclaredService, ServiceOptions } from "@open-pioneer/runtime";
-import { CatalogService, OrderOption, SearchFilter, SearchResultEntry } from "catalog";
+import {
+    CatalogService,
+    Facet,
+    FacetOption,
+    OrderOption,
+    SearchFilter,
+    SearchResultEntry
+} from "catalog";
 import { API_URL } from "./constants";
 
 interface References {
@@ -14,11 +21,15 @@ export interface SearchService extends DeclaredService<"SearchService"> {
     results: SearchResultEntry[] | undefined;
     resultCount: number;
     currentFilter: SearchFilter;
+    facets: Facet[];
     set pageSize(pageSize: number);
-    set searchTerm(v: string);
+    set searchTerm(searchTerm: string | undefined);
     set order(order: OrderOption);
     addNextPage(): void;
     getOrderOptions(): Promise<OrderOption[]>;
+    getFacetOptions(facet: Facet): Promise<FacetOption[]>;
+    toggleFacetOption(facet: Facet, option: FacetOption): void;
+    isFacetOptionSelected(facet: Facet, option: FacetOption): boolean;
 }
 
 export class SearchServiceImpl implements SearchService {
@@ -30,14 +41,18 @@ export class SearchServiceImpl implements SearchService {
 
     #resultCount: Reactive<number> = reactive(0);
 
+    #facets: Reactive<Facet[]> = reactive([]);
+
     #currentFilter: SearchFilter = {
         pageSize: 5,
-        page: 1
+        page: 1,
+        facets: []
     };
 
     constructor(serviceOptions: ServiceOptions<References>) {
         this.catalogSrvc = serviceOptions.references.catalogService;
         this.triggerSearch();
+        this.catalogSrvc.getFacets().then((facets) => (this.#facets.value = facets));
     }
 
     get searching(): boolean {
@@ -56,7 +71,11 @@ export class SearchServiceImpl implements SearchService {
         return this.#currentFilter;
     }
 
-    set searchTerm(term: string) {
+    get facets(): Facet[] {
+        return this.#facets.value;
+    }
+
+    set searchTerm(term: string | undefined) {
         this.#currentFilter.searchTerm = term;
         this.triggerSearch();
     }
@@ -71,6 +90,30 @@ export class SearchServiceImpl implements SearchService {
         this.triggerSearch();
     }
 
+    toggleFacetOption(facet: Facet, option: FacetOption): void {
+        const entryIdx = this.#currentFilter.facets?.findIndex(
+            (e) => e.facet.key === facet.key && e.option.key === option.key
+        );
+        if (entryIdx >= 0) {
+            this.#currentFilter.facets = this.#currentFilter.facets.filter(
+                (f, i) => i !== entryIdx
+            );
+        } else {
+            this.#currentFilter.facets.push({
+                facet,
+                option
+            });
+        }
+        this.triggerSearch();
+    }
+
+    isFacetOptionSelected(facet: Facet, option: FacetOption): boolean {
+        const entryIdx = this.#currentFilter.facets?.findIndex(
+            (e) => e.facet.key === facet.key && e.option.key === option.key
+        );
+        return entryIdx >= 0;
+    }
+
     addNextPage(): void {
         console.log("start loading next page");
         if (!this.#searching.value && this.#currentFilter.page !== undefined) {
@@ -80,7 +123,11 @@ export class SearchServiceImpl implements SearchService {
     }
 
     getOrderOptions(): Promise<OrderOption[]> {
-        return this.catalogSrvc.getOrderOptions();
+        return this.catalogSrvc.getOrderOptions(API_URL);
+    }
+
+    getFacetOptions(facet: Facet): Promise<FacetOption[]> {
+        return this.catalogSrvc.loadFacetOptions(facet, API_URL, this.#currentFilter);
     }
 
     private triggerSearch(appendResults: boolean = false) {
@@ -88,8 +135,7 @@ export class SearchServiceImpl implements SearchService {
         if (!appendResults) {
             this.#results.value = undefined;
         }
-        const url = API_URL;
-        this.catalogSrvc.startSearch(url, this.#currentFilter).then((res) => {
+        this.catalogSrvc.startSearch(API_URL, this.#currentFilter).then((res) => {
             console.log(`Search results ${res.count}`);
             if (appendResults && this.#results.value && res.results) {
                 this.#results.value = this.#results.value.concat(res.results);

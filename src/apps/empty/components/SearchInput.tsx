@@ -28,6 +28,11 @@ export function SearchInput() {
         }
     }
 
+    function clearSearchTerm() {
+        setSearchTerm("");
+        searchSrvc.searchTerm = undefined;
+    }
+
     return (
         <HStack>
             <InputGroup>
@@ -38,7 +43,7 @@ export function SearchInput() {
                     onChange={(evt) => setSearchTerm(evt.target.value)}
                 />
                 <InputRightElement>
-                    {searchTerm && <CloseButton onClick={() => setSearchTerm("")}></CloseButton>}
+                    {searchTerm && <CloseButton onClick={clearSearchTerm}></CloseButton>}
                 </InputRightElement>
             </InputGroup>
             <Button colorScheme="blue" onClick={triggerSearch}>

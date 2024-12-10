@@ -19,14 +19,32 @@ export interface OrderOption {
     label: string;
 }
 
+export interface FacetOption {
+    key: string;
+    label: string;
+    count?: number;
+}
+
+export interface Facet {
+    key: string;
+    label: string;
+    type: "multiString";
+}
+
 export interface SearchFilter {
     searchTerm?: string;
     pageSize?: number;
     page?: number;
     order?: OrderOption;
+    facets: {
+        facet: Facet;
+        option: FacetOption;
+    }[];
 }
 
 export interface CatalogService extends DeclaredService<"geonode-catalog.CatalogService"> {
     startSearch(url: string, filter: SearchFilter): Promise<SearchResponse>;
-    getOrderOptions(): Promise<OrderOption[]>;
+    getOrderOptions(url: string): Promise<OrderOption[]>;
+    getFacets(): Promise<Facet[]>;
+    loadFacetOptions(facet: Facet, url: string, filter: SearchFilter): Promise<FacetOption[]>;
 }

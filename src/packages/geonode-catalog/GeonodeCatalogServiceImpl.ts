@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 import {
     CatalogService,
+    Facet,
+    FacetOption,
     OrderOption,
     SearchFilter,
     SearchResponse,
@@ -19,6 +21,10 @@ interface GeonodeResource {
     pk: string;
     thumbnail_url: string;
     abstract: string;
+}
+
+interface ExtendedFacet extends Facet {
+    filterParam: string;
 }
 
 export class GeonodeCatalogServiceImpl implements CatalogService {
@@ -49,7 +55,18 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
             params.set("sort[]", filter.order.key);
         }
 
+        if (filter.facets.length) {
+            filter.facets.forEach((e) => {
+                if (e.facet.type === "multiString") {
+                    const facet = e.facet as ExtendedFacet;
+                    params.append(facet.filterParam, e.option.key);
+                }
+            });
+        }
+
         params.set("api_preset", "catalog_list");
+        // params.set("include[]", "keywords");
+        params.set("filter{metadata_only}", "false");
 
         const fetchUrl = `${url}resources?${params}`;
 
@@ -89,6 +106,65 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
                 }
             ])
         );
+    }
+
+    getFacets(): Promise<ExtendedFacet[]> {
+        // TODO: ggf. von der API laden
+        return new Promise<ExtendedFacet[]>((resolve) =>
+            resolve([
+                {
+                    key: "keyword",
+                    type: "multiString",
+                    label: "Keyword",
+                    filterParam: "filter{keywords.slug.in}"
+                },
+                {
+                    key: "region",
+                    type: "multiString",
+                    label: "Region",
+                    filterParam: "filter{regions.code.in}"
+                },
+                {
+                    key: "owner",
+                    type: "multiString",
+                    label: "Owner",
+                    filterParam: "filter{owner.pk.in}"
+                }
+            ])
+        );
+    }
+
+    loadFacetOptions(
+        facet: ExtendedFacet,
+        url: string,
+        filter: SearchFilter
+    ): Promise<FacetOption[]> {
+        const params = new URLSearchParams();
+
+        params.set("page", "0");
+        params.set("page_size", "10");
+
+        if (filter.facets.length) {
+            filter.facets.forEach((e) => {
+                if (e.facet.type === "multiString") {
+                    const facet = e.facet as ExtendedFacet;
+                    params.append(facet.filterParam, e.option.key);
+                }
+            });
+        }
+
+        const fetchUrl = `${url}facets/${facet.key}?${params}`;
+
+        return this.httpService
+            .fetch(fetchUrl)
+            .then((response) => response.json())
+            .then((response) => {
+                if (response.topics.items) {
+                    return response.topics.items;
+                } else {
+                    return [];
+                }
+            });
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
