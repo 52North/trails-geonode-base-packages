@@ -17,6 +17,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { SearchService } from "../search-service";
 import { useService } from "open-pioneer:react-hooks";
 import { useReactiveSnapshot } from "@open-pioneer/reactivity";
+import { NotificationService } from "@open-pioneer/notifier";
 
 export function FacetComp(props: { facet: Facet }) {
     const { facet } = props;
@@ -47,6 +48,7 @@ export function FacetComp(props: { facet: Facet }) {
 function FacetOptionList(props: { facet: Facet; isExpanded: boolean }) {
     const { facet, isExpanded } = props;
     const searchSrvc = useService<SearchService>("SearchService");
+    const notificationSrvc = useService<NotificationService>("notifier.NotificationService");
 
     const [options, setOptions] = useState<FacetOption[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -73,10 +75,22 @@ function FacetOptionList(props: { facet: Facet; isExpanded: boolean }) {
     function loadingOptions() {
         console.log(`${facet.key} is expanded and must reload`);
         setLoading(true);
-        searchSrvc.getFacetOptions(facet).then((res) => {
-            setLoading(false);
-            setOptions(res);
-        });
+        searchSrvc
+            .getFacetOptions(facet)
+            .then((res) => {
+                setLoading(false);
+                setOptions(res);
+            })
+            .catch((err) => {
+                console.error(err);
+                notificationSrvc.notify({
+                    level: "error",
+                    title: `No facet options for ${facet.label}`,
+                    message: "Error while requesting facet options"
+                });
+                setOptions([]);
+                setLoading(false);
+            });
     }
 
     function Loading() {

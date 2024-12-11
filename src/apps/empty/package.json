@@ -3,8 +3,9 @@
     "private": true,
     "dependencies": {
         "@open-pioneer/chakra-integration": "catalog:",
-        "@open-pioneer/runtime": "catalog:",
+        "@open-pioneer/notifier": "catalog:",
         "@open-pioneer/reactivity": "catalog:",
+        "@open-pioneer/runtime": "catalog:",
         "sample-package": "workspace:^",
         "geonode-catalog": "workspace:^",
         "catalog": "workspace:^"

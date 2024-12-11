@@ -11,9 +11,11 @@ import {
     SearchResultEntry
 } from "catalog";
 import { API_URL } from "./constants";
+import { NotificationService } from "@open-pioneer/notifier";
 
 interface References {
     catalogService: CatalogService;
+    notificationService: NotificationService;
 }
 
 export interface SearchService extends DeclaredService<"SearchService"> {
@@ -34,6 +36,7 @@ export interface SearchService extends DeclaredService<"SearchService"> {
 
 export class SearchServiceImpl implements SearchService {
     private catalogSrvc: CatalogService;
+    private notificationSrvc: NotificationService;
 
     #searching: Reactive<boolean> = reactive(false);
 
@@ -51,6 +54,7 @@ export class SearchServiceImpl implements SearchService {
 
     constructor(serviceOptions: ServiceOptions<References>) {
         this.catalogSrvc = serviceOptions.references.catalogService;
+        this.notificationSrvc = serviceOptions.references.notificationService;
         this.triggerSearch();
         this.catalogSrvc.getFacets().then((facets) => (this.#facets.value = facets));
     }
@@ -135,17 +139,28 @@ export class SearchServiceImpl implements SearchService {
         if (!appendResults) {
             this.#results.value = undefined;
         }
-        this.catalogSrvc.startSearch(API_URL, this.#currentFilter).then((res) => {
-            console.log(`Search results ${res.count}`);
-            if (appendResults && this.#results.value && res.results) {
-                this.#results.value = this.#results.value.concat(res.results);
-            } else {
-                this.#results.value = res.results;
-            }
-            if (res.count !== undefined) {
-                this.#resultCount.value = res.count;
-            }
-            this.#searching.value = false;
-        });
+        this.catalogSrvc
+            .startSearch(API_URL, this.#currentFilter)
+            .then((res) => {
+                console.log(`Search results ${res.count}`);
+                if (appendResults && this.#results.value && res.results) {
+                    this.#results.value = this.#results.value.concat(res.results);
+                } else {
+                    this.#results.value = res.results;
+                }
+                if (res.count !== undefined) {
+                    this.#resultCount.value = res.count;
+                }
+                this.#searching.value = false;
+            })
+            .catch((err) => {
+                console.error(err);
+                this.notificationSrvc.notify({
+                    level: "error",
+                    message: "Error while requesting search results",
+                    title: "No search results"
+                });
+                this.#searching.value = false;
+            });
     }
 }
