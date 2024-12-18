@@ -7,6 +7,7 @@ import react from "@vitejs/plugin-react-swc";
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import eslint from "vite-plugin-eslint";
+import checker from "vite-plugin-checker";
 
 // Minimum browser versions supported by generated JS/CSS
 // See also:
@@ -56,7 +57,10 @@ export default defineConfig(({ mode }) => {
                 apps: []
             }),
             react(),
-            eslint()
+            eslint(),
+            checker({
+                typescript: true
+            })
         ],
 
         // Ignore irrelevant deprecations.

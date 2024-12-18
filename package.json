@@ -111,6 +111,7 @@
         "typedoc": "catalog:",
         "typescript": "catalog:",
         "vite": "catalog:",
+        "vite-plugin-checker": "catalog:",
         "vite-plugin-eslint": "catalog:",
         "vitest": "catalog:"
     },
