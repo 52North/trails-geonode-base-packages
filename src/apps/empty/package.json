@@ -6,8 +6,9 @@
         "@open-pioneer/notifier": "catalog:",
         "@open-pioneer/reactivity": "catalog:",
         "@open-pioneer/runtime": "catalog:",
-        "sample-package": "workspace:^",
+        "react-datepicker": "catalog:",
+        "catalog": "workspace:^",
         "geonode-catalog": "workspace:^",
-        "catalog": "workspace:^"
+        "sample-package": "workspace:^"
     }
 }

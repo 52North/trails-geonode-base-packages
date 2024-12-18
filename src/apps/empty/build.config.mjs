@@ -4,6 +4,7 @@ import { defineBuildConfig } from "@open-pioneer/build-support";
 
 export default defineBuildConfig({
     i18n: ["en"],
+    styles: "./styles.scss",
     ui: {
         references: ["SearchService", "notifier.NotificationService"]
     },

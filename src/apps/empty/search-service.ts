@@ -5,6 +5,7 @@ import { DeclaredService, ServiceOptions } from "@open-pioneer/runtime";
 import {
     CatalogService,
     Facet,
+    FacetDate,
     FacetOption,
     OrderOption,
     SearchFilter,
@@ -30,8 +31,9 @@ export interface SearchService extends DeclaredService<"SearchService"> {
     addNextPage(): void;
     getOrderOptions(): Promise<OrderOption[]>;
     getFacetOptions(facet: Facet): Promise<FacetOption[]>;
-    toggleFacetOption(facet: Facet, option: FacetOption): void;
     isFacetOptionSelected(facet: Facet, option: FacetOption): boolean;
+    toggleFacetOption(facet: Facet, option: FacetOption): void;
+    setDateFacet(facet: Facet, date: Date | null): void;
 }
 
 export class SearchServiceImpl implements SearchService {
@@ -94,9 +96,9 @@ export class SearchServiceImpl implements SearchService {
         this.triggerSearch();
     }
 
-    toggleFacetOption(facet: Facet, option: FacetOption): void {
+    toggleFacetOption(facet: Facet, selection: FacetOption): void {
         const entryIdx = this.#currentFilter.facets?.findIndex(
-            (e) => e.facet.key === facet.key && e.option.key === option.key
+            (e) => e.facet.key === facet.key && e.selection.key === selection.key
         );
         if (entryIdx >= 0) {
             this.#currentFilter.facets = this.#currentFilter.facets.filter(
@@ -105,15 +107,40 @@ export class SearchServiceImpl implements SearchService {
         } else {
             this.#currentFilter.facets.push({
                 facet,
-                option
+                selection
             });
         }
         this.triggerSearch();
     }
 
-    isFacetOptionSelected(facet: Facet, option: FacetOption): boolean {
+    setDateFacet(facet: Facet, date: Date | null): void {
+        const entryIdx = this.#currentFilter.facets?.findIndex((e) => e.facet.key === facet.key);
+        if (entryIdx >= 0) {
+            if (date) {
+                this.#currentFilter.facets[entryIdx]!.selection = {
+                    key: facet.key,
+                    date: date
+                } as FacetDate;
+            } else {
+                this.#currentFilter.facets = this.#currentFilter.facets.filter(
+                    (f, i) => i !== entryIdx
+                );
+            }
+        } else {
+            this.#currentFilter.facets.push({
+                facet,
+                selection: {
+                    key: facet.key,
+                    date: date
+                } as FacetDate
+            });
+        }
+        this.triggerSearch();
+    }
+
+    isFacetOptionSelected(facet: Facet, selection: FacetOption): boolean {
         const entryIdx = this.#currentFilter.facets?.findIndex(
-            (e) => e.facet.key === facet.key && e.option.key === option.key
+            (e) => e.facet.key === facet.key && e.selection.key === selection.key
         );
         return entryIdx >= 0;
     }

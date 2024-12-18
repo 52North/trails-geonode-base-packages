@@ -1,51 +1,15 @@
 // SPDX-FileCopyrightText: 2023 Open Pioneer project (https://github.com/open-pioneer)
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    Box,
-    Accordion,
-    AccordionItem,
-    AccordionButton,
-    AccordionIcon,
-    AccordionPanel,
-    CircularProgress,
-    Center,
-    List
-} from "@open-pioneer/chakra-integration";
 import { Facet, FacetOption } from "catalog";
-import { ReactNode, useEffect, useState } from "react";
-import { SearchService } from "../search-service";
+import { SearchService } from "../../search-service";
 import { useService } from "open-pioneer:react-hooks";
-import { useReactiveSnapshot } from "@open-pioneer/reactivity";
 import { NotificationService } from "@open-pioneer/notifier";
+import { ReactNode, useEffect, useState } from "react";
+import { useReactiveSnapshot } from "@open-pioneer/reactivity";
+import { Box, Center, CircularProgress, List } from "@open-pioneer/chakra-integration";
 
-export function FacetComp(props: { facet: Facet }) {
-    const { facet } = props;
-    return (
-        <Accordion allowToggle>
-            <AccordionItem>
-                {({ isExpanded }) => (
-                    <>
-                        <AccordionButton>
-                            <Box as="span" flex="1" textAlign="left">
-                                {facet.label} {isExpanded ? "exp" : ""}
-                            </Box>
-                            <AccordionIcon />
-                        </AccordionButton>
-                        <AccordionPanel pb={3}>
-                            <FacetOptionList
-                                facet={facet}
-                                isExpanded={isExpanded}
-                            ></FacetOptionList>
-                        </AccordionPanel>
-                    </>
-                )}
-            </AccordionItem>
-        </Accordion>
-    );
-}
-
-function FacetOptionList(props: { facet: Facet; isExpanded: boolean }) {
+export function MultiSelectFacet(props: { facet: Facet; isExpanded: boolean }) {
     const { facet, isExpanded } = props;
     const searchSrvc = useService<SearchService>("SearchService");
     const notificationSrvc = useService<NotificationService>("notifier.NotificationService");

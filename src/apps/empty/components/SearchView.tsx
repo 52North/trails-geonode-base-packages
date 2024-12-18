@@ -18,7 +18,7 @@ import { ResultEntry } from "./ResultEntry";
 import { PageSizeSelection } from "./PageSizeSelection";
 import { InfinitePageLoad } from "./InfinitePageLoad";
 import { Ordering } from "./Ordering";
-import { FacetComp } from "./Facet";
+import { FacetComp } from "./facets/Facet";
 
 export function SearchView() {
     const searchSrvc = useService<SearchService>("SearchService");

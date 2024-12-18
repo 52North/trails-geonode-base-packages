@@ -19,16 +19,23 @@ export interface OrderOption {
     label: string;
 }
 
-export interface FacetOption {
+export interface FacetSelection {
     key: string;
+}
+
+export interface FacetOption extends FacetSelection {
     label: string;
     count?: number;
+}
+
+export interface FacetDate extends FacetSelection {
+    date: Date;
 }
 
 export interface Facet {
     key: string;
     label: string;
-    type: "multiString";
+    type: "multiString" | "date";
 }
 
 export interface SearchFilter {
@@ -38,7 +45,7 @@ export interface SearchFilter {
     order?: OrderOption;
     facets: {
         facet: Facet;
-        option: FacetOption;
+        selection: FacetSelection;
     }[];
 }
 

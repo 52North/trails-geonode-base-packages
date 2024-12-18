@@ -3,6 +3,7 @@
 import {
     CatalogService,
     Facet,
+    FacetDate,
     FacetOption,
     OrderOption,
     SearchFilter,
@@ -57,9 +58,13 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
 
         if (filter.facets.length) {
             filter.facets.forEach((e) => {
+                const { filterParam } = e.facet as ExtendedFacet;
                 if (e.facet.type === "multiString") {
-                    const facet = e.facet as ExtendedFacet;
-                    params.append(facet.filterParam, e.option.key);
+                    params.append(filterParam, e.selection.key);
+                }
+                if (e.facet.type === "date") {
+                    const option = e.selection as FacetDate;
+                    params.append(filterParam, option.date.toISOString());
                 }
             });
         }
@@ -113,6 +118,12 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
         return new Promise<ExtendedFacet[]>((resolve) =>
             resolve([
                 {
+                    key: "category",
+                    type: "multiString",
+                    label: "Category",
+                    filterParam: "filter{category.identifier.in}"
+                },
+                {
                     key: "keyword",
                     type: "multiString",
                     label: "Keyword",
@@ -125,10 +136,28 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
                     filterParam: "filter{regions.code.in}"
                 },
                 {
+                    key: "group",
+                    type: "multiString",
+                    label: "Group",
+                    filterParam: "filter{group.in}"
+                },
+                {
                     key: "owner",
                     type: "multiString",
                     label: "Owner",
                     filterParam: "filter{owner.pk.in}"
+                },
+                {
+                    key: "date_from",
+                    type: "date",
+                    label: "Date from",
+                    filterParam: "filter{date.gte}"
+                },
+                {
+                    key: "date_to",
+                    type: "date",
+                    label: "Date to",
+                    filterParam: "filter{date.lte}"
                 }
             ])
         );
@@ -147,8 +176,13 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
         if (filter.facets.length) {
             filter.facets.forEach((e) => {
                 if (e.facet.type === "multiString") {
-                    const facet = e.facet as ExtendedFacet;
-                    params.append(facet.filterParam, e.option.key);
+                    const { filterParam } = e.facet as ExtendedFacet;
+                    params.append(filterParam, e.selection.key);
+                }
+                if (e.facet.type === "date") {
+                    const { filterParam } = e.facet as ExtendedFacet;
+                    const { date } = e.selection as FacetDate;
+                    params.append(filterParam, date.toISOString());
                 }
             });
         }
