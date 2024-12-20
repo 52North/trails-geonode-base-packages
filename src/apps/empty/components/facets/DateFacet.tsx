@@ -7,8 +7,8 @@ import { useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import { Box, CloseButton, HStack, VStack } from "@open-pioneer/chakra-integration";
 import { DatePicker } from "../ReactDatePicker";
-import { SearchService } from "../../search-service";
 import { useService } from "open-pioneer:react-hooks";
+import { SearchService } from "../../services/search-service";
 
 export function DateFacet(props: { facet: Facet }) {
     const { facet } = props;

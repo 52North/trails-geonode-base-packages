@@ -10,7 +10,7 @@ import {
     InputRightElement
 } from "@open-pioneer/chakra-integration";
 import { useState } from "react";
-import { SearchService } from "../search-service";
+import { SearchService } from "../services/search-service";
 import { useService } from "open-pioneer:react-hooks";
 
 export function SearchInput() {

@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Facet, FacetOption } from "catalog";
-import { SearchService } from "../../search-service";
 import { useService } from "open-pioneer:react-hooks";
 import { NotificationService } from "@open-pioneer/notifier";
 import { ReactNode, useEffect, useState } from "react";
 import { useReactiveSnapshot } from "@open-pioneer/reactivity";
 import { Box, Center, CircularProgress, List } from "@open-pioneer/chakra-integration";
+import { SearchService } from "../../services/search-service";
 
 export function MultiSelectFacet(props: { facet: Facet; isExpanded: boolean }) {
     const { facet, isExpanded } = props;

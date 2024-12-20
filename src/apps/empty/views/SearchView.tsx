@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useService } from "open-pioneer:react-hooks";
-import { SearchService } from "../search-service";
+import { SearchService } from "../services/search-service";
 import { useReactiveSnapshot } from "@open-pioneer/reactivity";
 import {
     Box,
@@ -13,12 +13,13 @@ import {
     Progress,
     VStack
 } from "@open-pioneer/chakra-integration";
-import { SearchInput } from "./SearchInput";
-import { ResultEntry } from "./ResultEntry";
-import { PageSizeSelection } from "./PageSizeSelection";
-import { InfinitePageLoad } from "./InfinitePageLoad";
-import { Ordering } from "./Ordering";
-import { FacetComp } from "./facets/Facet";
+import { SearchInput } from "../components/SearchInput";
+import { ResultEntry } from "../components/ResultEntry";
+import { PageSizeSelection } from "../components/PageSizeSelection";
+import { InfinitePageLoad } from "../components/InfinitePageLoad";
+import { Ordering } from "../components/Ordering";
+import { FacetComp } from "../components/facets/Facet";
+import { useOnMountUnsafe } from "../components/helper";
 
 export function SearchView() {
     const searchSrvc = useService<SearchService>("SearchService");
@@ -26,6 +27,8 @@ export function SearchView() {
         () => [searchSrvc.results, searchSrvc.searching, searchSrvc.resultCount, searchSrvc.facets],
         [searchSrvc]
     );
+
+    useOnMountUnsafe(() => searchSrvc.initSearch());
 
     return (
         <>

@@ -2,11 +2,31 @@
 // SPDX-License-Identifier: Apache-2.0
 import { DeclaredService } from "@open-pioneer/runtime";
 
+// export enum ResultType {
+//     DATASET = "dataset",
+//     DOCUMENT = "document",
+//     MAP = "map",
+//     GEOSTORY = "geostory"
+// }
 export interface SearchResultEntry {
     id: string;
     title: string;
     imageUrl?: string;
     abstract: string;
+    type: string;
+    subType?: string;
+    alternate?: string;
+    extent?: {
+        coords: number[];
+        srid: string;
+    };
+    links?: {
+        extension: string;
+        link_type: string;
+        name: string;
+        mime: string;
+        url: string;
+    }[];
 }
 
 export interface SearchResponse {
@@ -51,6 +71,7 @@ export interface SearchFilter {
 
 export interface CatalogService extends DeclaredService<"geonode-catalog.CatalogService"> {
     startSearch(url: string, filter: SearchFilter): Promise<SearchResponse>;
+    loadResult(url: string, id: string): Promise<SearchResultEntry>;
     getOrderOptions(url: string): Promise<OrderOption[]>;
     getFacets(): Promise<Facet[]>;
     loadFacetOptions(facet: Facet, url: string, filter: SearchFilter): Promise<FacetOption[]>;

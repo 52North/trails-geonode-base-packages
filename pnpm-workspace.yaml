@@ -57,6 +57,7 @@ catalog:
   react-use: ^17.5.1
   react: *react_version
   react-datepicker: ^7.4.0
+  react-router: ^7.0.2
 
   # Devtools
   "@open-pioneer/build-package-cli": ^2.1.1

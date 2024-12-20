@@ -22,6 +22,20 @@ interface GeonodeResource {
     pk: string;
     thumbnail_url: string;
     abstract: string;
+    resource_type: string;
+    subtype?: string;
+    extent?: {
+        coords: number[];
+        srid: string;
+    };
+    alternate?: string;
+    links?: {
+        extension: string;
+        link_type: string;
+        name: string;
+        mime: string;
+        url: string;
+    }[];
 }
 
 interface ExtendedFacet extends Facet {
@@ -84,10 +98,6 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
                     results: response.resources.map((e: GeonodeResource) => this.parseResult(e))
                 };
             });
-        // TODO: how error handling:
-        // .catch((error) => {
-        //     debugger;
-        // });
     }
 
     getOrderOptions(): Promise<OrderOption[]> {
@@ -201,13 +211,32 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
             });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    loadResult(url: string, id: string): Promise<SearchResultEntry> {
+        const fetchUrl = `${url}resources/${id}`;
+        return this.httpService
+            .fetch(fetchUrl)
+            .then((response) => response.json())
+            .then((response) => {
+                if (response.resource) {
+                    return this.parseResult(response.resource);
+                } else {
+                    throw new Error("Could not parse result.");
+                }
+            });
+    }
+
     private parseResult(res: GeonodeResource): SearchResultEntry {
+        console.log(res);
         return {
             title: res.title,
             id: res.pk,
             imageUrl: res.thumbnail_url,
-            abstract: res.abstract
+            abstract: res.abstract,
+            type: res.resource_type,
+            subType: res.subtype,
+            extent: res.extent,
+            alternate: res.alternate,
+            links: res.links
         };
     }
 }

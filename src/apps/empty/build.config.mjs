@@ -6,7 +6,11 @@ export default defineBuildConfig({
     i18n: ["en"],
     styles: "./styles.scss",
     ui: {
-        references: ["SearchService", "notifier.NotificationService"]
+        references: [
+            "SearchService",
+            "notifier.NotificationService",
+            "geonode-catalog.CatalogService"
+        ]
     },
     services: {
         SearchServiceImpl: {
@@ -15,6 +19,9 @@ export default defineBuildConfig({
                 catalogService: "geonode-catalog.CatalogService",
                 notificationService: "notifier.NotificationService"
             }
+        },
+        ResultPreviewMapProvider: {
+            provides: ["map.MapConfigProvider"]
         }
     }
 });

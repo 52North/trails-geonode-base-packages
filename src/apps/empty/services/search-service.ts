@@ -11,8 +11,8 @@ import {
     SearchFilter,
     SearchResultEntry
 } from "catalog";
-import { API_URL } from "./constants";
 import { NotificationService } from "@open-pioneer/notifier";
+import { API_URL } from "../constants";
 
 interface References {
     catalogService: CatalogService;
@@ -28,6 +28,7 @@ export interface SearchService extends DeclaredService<"SearchService"> {
     set pageSize(pageSize: number);
     set searchTerm(searchTerm: string | undefined);
     set order(order: OrderOption);
+    initSearch(): void;
     addNextPage(): void;
     getOrderOptions(): Promise<OrderOption[]>;
     getFacetOptions(facet: Facet): Promise<FacetOption[]>;
@@ -57,6 +58,10 @@ export class SearchServiceImpl implements SearchService {
     constructor(serviceOptions: ServiceOptions<References>) {
         this.catalogSrvc = serviceOptions.references.catalogService;
         this.notificationSrvc = serviceOptions.references.notificationService;
+    }
+
+    initSearch(): void {
+        // TODO: implement params check here before triggering search
         this.triggerSearch();
         this.catalogSrvc.getFacets().then((facets) => (this.#facets.value = facets));
     }

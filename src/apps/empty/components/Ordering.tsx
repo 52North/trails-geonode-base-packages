@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Box, Select } from "@open-pioneer/chakra-integration";
-import { SearchService } from "../search-service";
+import { SearchService } from "../services/search-service";
 import { useService } from "open-pioneer:react-hooks";
 import { ChangeEvent, useEffect, useState } from "react";
 import { OrderOption } from "catalog";
