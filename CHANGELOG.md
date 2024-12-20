@@ -1,5 +1,18 @@
 # Changelog
 
+## 2024-12-05
+
+-   Update Open Pioneer Trails dependencies to latest version.
+    -   Core packages: 2.4.0 ([Changes](https://github.com/open-pioneer/trails-core-packages/pull/70#issue-2602612673))
+    -   OpenLayers base packages: 0.8.0 ([Changes](https://github.com/open-pioneer/trails-openlayers-base-packages/pull/370#issue-2610669421))
+-   Update OpenLayers to version 10.3.0.
+-   Slightly update patch setup with mocks needed by OpenLayers 10.3.0 (see `src/testing/global-setup.ts`).
+-   Update `chakra-react-select` to version 5.
+-   Update patch for chakra-ui's menu component (see patches in `package.json`).
+-   Remove obsolete chakra patches.
+-   Remove obsolete reference to `@chakra-ui/system`.
+    This dependency seems to be no longer required and may lead to duplicate packages in your dependency tree.
+
 ## 2024-11-18
 
 -   Add a new script: `pnpm run generate-sbom`.
