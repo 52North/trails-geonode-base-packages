@@ -29,7 +29,7 @@ export function GeoResultMap(props: GeoResultMapProps) {
 
     return (
         <>
-            <Box height={"500px"}>
+            <Box height={"100%"}>
                 <MapContainer mapId={RESULT_PREVIEW_MAP_ID}></MapContainer>
             </Box>
         </>

@@ -52,7 +52,9 @@ export function ResultEntry(props: { resultEntry: SearchResultEntry }) {
                 <CardBody>
                     <Heading size="md">{resultEntry.title}</Heading>
 
-                    <Text py="2">{/* {resultEntry.imageUrl} */}</Text>
+                    <Text py="2">
+                        {resultEntry.type} - {resultEntry.subType}
+                    </Text>
                 </CardBody>
 
                 <CardFooter justify={"flex-end"} padding={0} alignItems={"center"}>

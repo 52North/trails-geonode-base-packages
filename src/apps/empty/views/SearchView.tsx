@@ -31,35 +31,29 @@ export function SearchView() {
     useOnMountUnsafe(() => searchSrvc.initSearch());
 
     return (
-        <>
-            <Container maxW="8xl">
-                <VStack gap="10px" align="stretch">
-                    <SearchInput></SearchInput>
-                    {loading ? (
-                        <Progress size="xs" isIndeterminate />
-                    ) : (
-                        <Box height="4px"></Box>
-                    )}{" "}
-                    <Center gap={2}>
-                        <Box>{<Box>{resultCount} Results found</Box>}</Box>
-                        <PageSizeSelection></PageSizeSelection>
-                        <Ordering></Ordering>
-                    </Center>
-                    <Grid templateColumns="400px 1fr" gap={2}>
-                        <GridItem w="100%">
-                            {facets?.map((f) => <FacetComp key={f.key} facet={f}></FacetComp>)}
-                        </GridItem>
-                        <GridItem w="100%">
-                            <VStack>
-                                {results?.map((e) => (
-                                    <ResultEntry key={e.id} resultEntry={e}></ResultEntry>
-                                ))}
-                                <InfinitePageLoad></InfinitePageLoad>
-                            </VStack>
-                        </GridItem>
-                    </Grid>
-                </VStack>
-            </Container>
-        </>
+        <Container maxW="8xl" p={5}>
+            <VStack gap="10px" align="stretch">
+                <SearchInput></SearchInput>
+                {loading ? <Progress size="xs" isIndeterminate /> : <Box height="4px"></Box>}{" "}
+                <Center gap={2}>
+                    <Box>{<Box>{resultCount} Results found</Box>}</Box>
+                    <PageSizeSelection></PageSizeSelection>
+                    <Ordering></Ordering>
+                </Center>
+                <Grid templateColumns="400px 1fr" gap={2}>
+                    <GridItem w="100%">
+                        {facets?.map((f) => <FacetComp key={f.key} facet={f}></FacetComp>)}
+                    </GridItem>
+                    <GridItem w="100%">
+                        <VStack>
+                            {results?.map((e) => (
+                                <ResultEntry key={e.id} resultEntry={e}></ResultEntry>
+                            ))}
+                            <InfinitePageLoad></InfinitePageLoad>
+                        </VStack>
+                    </GridItem>
+                </Grid>
+            </VStack>
+        </Container>
     );
 }
