@@ -73,6 +73,7 @@
         "@open-pioneer/build-package-cli": "catalog:",
         "@open-pioneer/build-support": "catalog:",
         "@open-pioneer/check-pnpm-duplicates": "catalog:",
+        "@open-pioneer/http": "catalog:",
         "@open-pioneer/notifier": "catalog:",
         "@open-pioneer/reactivity": "catalog:",
         "@open-pioneer/vite-plugin-pioneer": "catalog:",
