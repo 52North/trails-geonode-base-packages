@@ -12,11 +12,18 @@ import {
 import { useState } from "react";
 import { SearchService } from "../services/search-service";
 import { useService } from "open-pioneer:react-hooks";
+import { useReactiveSnapshot } from "@open-pioneer/reactivity";
 
 export function SearchInput() {
     const searchSrvc = useService<SearchService>("SearchService");
 
     const [searchTerm, setSearchTerm] = useState<string>("");
+
+    useReactiveSnapshot(() => {
+        if (searchSrvc.currentFilter.searchTerm) {
+            setSearchTerm(searchSrvc.currentFilter.searchTerm);
+        }
+    }, [searchSrvc.currentFilter.searchTerm]);
 
     function triggerSearch(): void {
         searchSrvc.searchTerm = searchTerm;

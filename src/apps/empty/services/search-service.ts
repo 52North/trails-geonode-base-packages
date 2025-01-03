@@ -12,7 +12,7 @@ import {
     SearchResultEntry
 } from "catalog";
 import { NotificationService } from "@open-pioneer/notifier";
-import { API_URL } from "../constants";
+import { API_URL, URL_PARAM_SEARCH_TERM } from "../constants";
 
 interface References {
     catalogService: CatalogService;
@@ -58,12 +58,6 @@ export class SearchServiceImpl implements SearchService {
     constructor(serviceOptions: ServiceOptions<References>) {
         this.catalogSrvc = serviceOptions.references.catalogService;
         this.notificationSrvc = serviceOptions.references.notificationService;
-    }
-
-    initSearch(): void {
-        // TODO: implement params check here before triggering search
-        this.triggerSearch();
-        this.catalogSrvc.getFacets().then((facets) => (this.#facets.value = facets));
     }
 
     get searching(): boolean {
@@ -118,7 +112,7 @@ export class SearchServiceImpl implements SearchService {
         this.triggerSearch();
     }
 
-    setDateFacet(facet: Facet, date: Date | null): void {
+    setDateFacet(facet: Facet, date: Date | null, avoidTriggerSearch?: boolean): void {
         const entryIdx = this.#currentFilter.facets?.findIndex((e) => e.facet.key === facet.key);
         if (entryIdx >= 0) {
             if (date) {
@@ -140,7 +134,9 @@ export class SearchServiceImpl implements SearchService {
                 } as FacetDate
             });
         }
-        this.triggerSearch();
+        if (!avoidTriggerSearch) {
+            this.triggerSearch();
+        }
     }
 
     isFacetOptionSelected(facet: Facet, selection: FacetOption): boolean {
@@ -171,6 +167,7 @@ export class SearchServiceImpl implements SearchService {
         if (!appendResults) {
             this.#results.value = undefined;
         }
+        this.setUrlParams();
         this.catalogSrvc
             .startSearch(API_URL, this.#currentFilter)
             .then((res) => {
@@ -194,5 +191,71 @@ export class SearchServiceImpl implements SearchService {
                 });
                 this.#searching.value = false;
             });
+    }
+
+    initSearch(): void {
+        const url = new URL(window.location.href);
+        const searchTerm = url.searchParams.get(URL_PARAM_SEARCH_TERM);
+        if (searchTerm) {
+            this.#currentFilter.searchTerm = searchTerm;
+        }
+        this.catalogSrvc.getFacets().then((facets) => {
+            this.#facets.value = facets;
+            facets.forEach((facet) => {
+                const param = `facet_${facet.key}`;
+                const props = url.searchParams.getAll(param);
+                if (props) {
+                    switch (facet.type) {
+                        case "date":
+                            // eslint-disable-next-line no-case-declarations
+                            const temp = props[0];
+                            if (temp) {
+                                const date = new Date(temp);
+                                if (date) {
+                                    this.setDateFacet(facet, date, true);
+                                }
+                            }
+                            break;
+                        case "multiString":
+                            // TODO: needs implemented
+                            // debugger;
+                            // props.forEach(prop => {
+
+                            // });
+                            break;
+                        default:
+                            console.warn(`No url param support for ${facet.key}`);
+                            break;
+                    }
+                }
+            });
+            this.triggerSearch();
+        });
+    }
+
+    private setUrlParams() {
+        const searchParams = new URLSearchParams();
+
+        if (this.#currentFilter.searchTerm) {
+            searchParams.set(URL_PARAM_SEARCH_TERM, this.#currentFilter.searchTerm);
+        }
+
+        this.#currentFilter.facets.forEach((entry) => {
+            const param = `facet_${entry.facet.key}`;
+            switch (entry.facet.type) {
+                case "date":
+                    searchParams.set(param, (entry.selection as FacetDate).date.toISOString());
+                    break;
+                case "multiString":
+                    searchParams.append(param, entry.selection.key);
+                    break;
+                default:
+                    console.warn(`No url param support for ${entry.facet.key}`);
+                    break;
+            }
+        });
+        const location = window.location;
+        const url = `${location.origin}?${searchParams.toString()}`;
+        window.history.pushState(null, "", url);
     }
 }

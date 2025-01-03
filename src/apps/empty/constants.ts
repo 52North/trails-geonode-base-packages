@@ -3,3 +3,6 @@
 
 export const API_URL = "https://webais.demo.52north.org/api/v2/";
 // export const API_URL = "https://stable.demo.geonode.org/api/v2/";
+
+// URL Params for search
+export const URL_PARAM_SEARCH_TERM = "searchTerm";
