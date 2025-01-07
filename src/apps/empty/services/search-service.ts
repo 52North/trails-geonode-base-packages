@@ -17,12 +17,14 @@ export interface SearchService extends DeclaredService<"SearchService"> {
     resultCount: number;
     currentFilter: SearchFilter;
     facets: Facet[];
+    hasActiveFilter: boolean;
     set pageSize(pageSize: number);
     set searchTerm(searchTerm: string | undefined);
     set order(order: OrderOption);
     initSearch(): void;
     startSearch(): void;
     addNextPage(): void;
+    clearAllFilter(): void;
     getOrderOptions(): Promise<OrderOption[]>;
 }
 
@@ -81,6 +83,17 @@ export class SearchServiceImpl implements SearchService {
 
     set order(order: OrderOption) {
         this.#currentFilter.order = order;
+        this.triggerSearch();
+    }
+
+    get hasActiveFilter() {
+        const activeFacets = this.#currentFilter.facets.some((facet) => facet.hasActiveFilter());
+        return activeFacets || this.#currentFilter.searchTerm !== undefined;
+    }
+
+    clearAllFilter(): void {
+        this.#currentFilter.searchTerm = undefined;
+        this.#currentFilter.facets.forEach((facet) => facet.clearFilter());
         this.triggerSearch();
     }
 

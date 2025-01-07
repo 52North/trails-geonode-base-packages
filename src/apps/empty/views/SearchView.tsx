@@ -6,11 +6,13 @@ import { SearchService } from "../services/search-service";
 import { useReactiveSnapshot } from "@open-pioneer/reactivity";
 import {
     Box,
+    Button,
     Center,
     Container,
     Grid,
     GridItem,
     Progress,
+    Spacer,
     VStack
 } from "@open-pioneer/chakra-integration";
 import { SearchInput } from "../components/SearchInput";
@@ -36,6 +38,8 @@ export function SearchView() {
                 <SearchInput></SearchInput>
                 {loading ? <Progress size="xs" isIndeterminate /> : <Box height="4px"></Box>}{" "}
                 <Center gap={2}>
+                    {clearActiveFilterButton()}
+                    <Spacer></Spacer>
                     <Box>{<Box>{resultCount} Results found</Box>}</Box>
                     <PageSizeSelection></PageSizeSelection>
                     <Ordering></Ordering>
@@ -56,4 +60,14 @@ export function SearchView() {
             </VStack>
         </Container>
     );
+
+    function clearActiveFilterButton() {
+        return searchSrvc.hasActiveFilter ? (
+            <Button colorScheme="blue" onClick={() => searchSrvc.clearAllFilter()}>
+                Clear active Filter
+            </Button>
+        ) : (
+            ""
+        );
+    }
 }

@@ -57,6 +57,8 @@ export abstract class Facet {
     abstract appendSearchParams(params: URLSearchParams): void;
 
     abstract applyOfSearchParams(params: URLSearchParams): void;
+
+    abstract clearFilter(): void;
 }
 
 export abstract class DateFacet extends Facet {
@@ -68,6 +70,10 @@ export abstract class DateFacet extends Facet {
 
     getDate(): Date | null {
         return this.date;
+    }
+
+    clearFilter(): void {
+        this.date = null;
     }
 
     hasActiveFilter(): boolean {
@@ -117,6 +123,10 @@ export abstract class MultiSelectionFacet extends Facet {
 
     hasActiveFilter(): boolean {
         return this.selections.length > 0;
+    }
+
+    clearFilter(): void {
+        this.selections = [];
     }
 
     appendSearchParams(urlParams: URLSearchParams): void {

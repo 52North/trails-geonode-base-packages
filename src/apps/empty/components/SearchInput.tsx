@@ -22,6 +22,8 @@ export function SearchInput() {
     useReactiveSnapshot(() => {
         if (searchSrvc.currentFilter.searchTerm) {
             setSearchTerm(searchSrvc.currentFilter.searchTerm);
+        } else {
+            setSearchTerm("");
         }
     }, [searchSrvc.currentFilter.searchTerm]);
 
