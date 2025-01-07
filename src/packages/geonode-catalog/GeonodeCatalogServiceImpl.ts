@@ -204,6 +204,12 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
     ): Promise<MultiSelectionFacetOption[]> {
         const params = new URLSearchParams();
 
+        if (filter.searchTerm) {
+            params.set("search", filter.searchTerm);
+            params.append("search_fields", "title");
+            params.append("search_fields", "abstract");
+        }
+
         params.set("page", "0");
         params.set("page_size", "10");
 
@@ -238,7 +244,6 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
     }
 
     private parseResult(res: GeonodeResource): SearchResultEntry {
-        console.log(res);
         return {
             title: res.title,
             id: res.pk,
