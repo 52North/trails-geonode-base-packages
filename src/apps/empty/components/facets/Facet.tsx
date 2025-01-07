@@ -9,19 +9,25 @@ import {
     AccordionIcon,
     AccordionPanel
 } from "@open-pioneer/chakra-integration";
-import { Facet } from "catalog";
-import { DateFacet } from "./DateFacet";
+import { DateFacetComp } from "./DateFacet";
 import { MultiSelectFacet } from "./MultiSelectFacet";
+import { DateFacet, Facet, MultiSelectionFacet } from "catalog";
 
 export function FacetComp(props: { facet: Facet }) {
     const { facet } = props;
+
     return (
         <Accordion allowToggle>
             <AccordionItem>
                 {({ isExpanded }) => (
                     <>
                         <AccordionButton>
-                            <Box as="span" flex="1" textAlign="left">
+                            <Box
+                                as="span"
+                                flex="1"
+                                textAlign="left"
+                                fontWeight={facet.hasActiveFilter() ? "bold" : "normal"}
+                            >
                                 {facet.label}
                             </Box>
                             <AccordionIcon />
@@ -34,14 +40,18 @@ export function FacetComp(props: { facet: Facet }) {
     );
 
     function getFacetContent(isExpanded: boolean) {
-        switch (facet.type) {
-            case "multiString":
-                return <MultiSelectFacet facet={facet} isExpanded={isExpanded}></MultiSelectFacet>;
-            case "date":
-                return <DateFacet facet={facet}></DateFacet>;
-            default:
-                console.error("Could not find facet type");
-                return <></>;
+        if (facet instanceof DateFacet) {
+            return <DateFacetComp dateFacet={facet}></DateFacetComp>;
         }
+        if (facet instanceof MultiSelectionFacet) {
+            return (
+                <MultiSelectFacet
+                    multiSelectionFacet={facet}
+                    isExpanded={isExpanded}
+                ></MultiSelectFacet>
+            );
+        }
+        console.error("Could not find facet type");
+        return <></>;
     }
 }

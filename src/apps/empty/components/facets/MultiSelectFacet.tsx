@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023 Open Pioneer project (https://github.com/open-pioneer)
 // SPDX-License-Identifier: Apache-2.0
 
-import { Facet, FacetOption } from "catalog";
+import { MultiSelectionFacetOption, MultiSelectionFacet } from "catalog";
 import { useService } from "open-pioneer:react-hooks";
 import { NotificationService } from "@open-pioneer/notifier";
 import { ReactNode, useEffect, useState } from "react";
@@ -9,12 +9,15 @@ import { useReactiveSnapshot } from "@open-pioneer/reactivity";
 import { Box, Center, CircularProgress, List } from "@open-pioneer/chakra-integration";
 import { SearchService } from "../../services/search-service";
 
-export function MultiSelectFacet(props: { facet: Facet; isExpanded: boolean }) {
-    const { facet, isExpanded } = props;
+export function MultiSelectFacet(props: {
+    multiSelectionFacet: MultiSelectionFacet;
+    isExpanded: boolean;
+}) {
+    const { multiSelectionFacet, isExpanded } = props;
     const searchSrvc = useService<SearchService>("SearchService");
     const notificationSrvc = useService<NotificationService>("notifier.NotificationService");
 
-    const [options, setOptions] = useState<FacetOption[]>([]);
+    const [options, setOptions] = useState<MultiSelectionFacetOption[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
@@ -37,10 +40,10 @@ export function MultiSelectFacet(props: { facet: Facet; isExpanded: boolean }) {
     }, [reloadNeccessary]);
 
     function loadingOptions() {
-        console.log(`${facet.key} is expanded and must reload`);
+        console.log(`${multiSelectionFacet.key} is expanded and must reload`);
         setLoading(true);
-        searchSrvc
-            .getFacetOptions(facet)
+        multiSelectionFacet
+            .loadFacetOptions(searchSrvc.currentFilter)
             .then((res) => {
                 setLoading(false);
                 setOptions(res);
@@ -49,7 +52,7 @@ export function MultiSelectFacet(props: { facet: Facet; isExpanded: boolean }) {
                 console.error(err);
                 notificationSrvc.notify({
                     level: "error",
-                    title: `No facet options for ${facet.label}`,
+                    title: `No facet options for ${multiSelectionFacet.label}`,
                     message: "Error while requesting facet options"
                 });
                 setOptions([]);
@@ -71,11 +74,12 @@ export function MultiSelectFacet(props: { facet: Facet; isExpanded: boolean }) {
         if (!loading && options.length) {
             return options.map((option) => {
                 function toggleFacetOption(): void {
-                    searchSrvc.toggleFacetOption(facet, option);
+                    multiSelectionFacet.toggleOption(option);
+                    searchSrvc.startSearch();
                 }
 
                 function isSelected() {
-                    return searchSrvc.isFacetOptionSelected(facet, option);
+                    return multiSelectionFacet.isOptionSelected(option);
                 }
 
                 return (

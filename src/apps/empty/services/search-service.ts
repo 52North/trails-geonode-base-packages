@@ -2,15 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { Reactive, reactive } from "@conterra/reactivity-core";
 import { DeclaredService, ServiceOptions } from "@open-pioneer/runtime";
-import {
-    CatalogService,
-    Facet,
-    FacetDate,
-    FacetOption,
-    OrderOption,
-    SearchFilter,
-    SearchResultEntry
-} from "catalog";
+import { CatalogService, Facet, OrderOption, SearchFilter, SearchResultEntry } from "catalog";
 import { NotificationService } from "@open-pioneer/notifier";
 import { API_URL, URL_PARAM_SEARCH_TERM } from "../constants";
 
@@ -29,12 +21,9 @@ export interface SearchService extends DeclaredService<"SearchService"> {
     set searchTerm(searchTerm: string | undefined);
     set order(order: OrderOption);
     initSearch(): void;
+    startSearch(): void;
     addNextPage(): void;
     getOrderOptions(): Promise<OrderOption[]>;
-    getFacetOptions(facet: Facet): Promise<FacetOption[]>;
-    isFacetOptionSelected(facet: Facet, option: FacetOption): boolean;
-    toggleFacetOption(facet: Facet, option: FacetOption): void;
-    setDateFacet(facet: Facet, date: Date | null): void;
 }
 
 export class SearchServiceImpl implements SearchService {
@@ -95,57 +84,6 @@ export class SearchServiceImpl implements SearchService {
         this.triggerSearch();
     }
 
-    toggleFacetOption(facet: Facet, selection: FacetOption): void {
-        const entryIdx = this.#currentFilter.facets?.findIndex(
-            (e) => e.facet.key === facet.key && e.selection.key === selection.key
-        );
-        if (entryIdx >= 0) {
-            this.#currentFilter.facets = this.#currentFilter.facets.filter(
-                (f, i) => i !== entryIdx
-            );
-        } else {
-            this.#currentFilter.facets.push({
-                facet,
-                selection
-            });
-        }
-        this.triggerSearch();
-    }
-
-    setDateFacet(facet: Facet, date: Date | null, avoidTriggerSearch?: boolean): void {
-        const entryIdx = this.#currentFilter.facets?.findIndex((e) => e.facet.key === facet.key);
-        if (entryIdx >= 0) {
-            if (date) {
-                this.#currentFilter.facets[entryIdx]!.selection = {
-                    key: facet.key,
-                    date: date
-                } as FacetDate;
-            } else {
-                this.#currentFilter.facets = this.#currentFilter.facets.filter(
-                    (f, i) => i !== entryIdx
-                );
-            }
-        } else {
-            this.#currentFilter.facets.push({
-                facet,
-                selection: {
-                    key: facet.key,
-                    date: date
-                } as FacetDate
-            });
-        }
-        if (!avoidTriggerSearch) {
-            this.triggerSearch();
-        }
-    }
-
-    isFacetOptionSelected(facet: Facet, selection: FacetOption): boolean {
-        const entryIdx = this.#currentFilter.facets?.findIndex(
-            (e) => e.facet.key === facet.key && e.selection.key === selection.key
-        );
-        return entryIdx >= 0;
-    }
-
     addNextPage(): void {
         console.log("start loading next page");
         if (!this.#searching.value && this.#currentFilter.page !== undefined) {
@@ -158,8 +96,8 @@ export class SearchServiceImpl implements SearchService {
         return this.catalogSrvc.getOrderOptions(API_URL);
     }
 
-    getFacetOptions(facet: Facet): Promise<FacetOption[]> {
-        return this.catalogSrvc.loadFacetOptions(facet, API_URL, this.#currentFilter);
+    startSearch(): void {
+        this.triggerSearch();
     }
 
     private triggerSearch(appendResults: boolean = false) {
@@ -199,36 +137,10 @@ export class SearchServiceImpl implements SearchService {
         if (searchTerm) {
             this.#currentFilter.searchTerm = searchTerm;
         }
-        this.catalogSrvc.getFacets().then((facets) => {
+        this.catalogSrvc.getFacets(API_URL).then((facets) => {
+            this.#currentFilter.facets = facets;
             this.#facets.value = facets;
-            facets.forEach((facet) => {
-                const param = `facet_${facet.key}`;
-                const props = url.searchParams.getAll(param);
-                if (props) {
-                    switch (facet.type) {
-                        case "date":
-                            // eslint-disable-next-line no-case-declarations
-                            const temp = props[0];
-                            if (temp) {
-                                const date = new Date(temp);
-                                if (date) {
-                                    this.setDateFacet(facet, date, true);
-                                }
-                            }
-                            break;
-                        case "multiString":
-                            // TODO: needs implemented
-                            // debugger;
-                            // props.forEach(prop => {
-
-                            // });
-                            break;
-                        default:
-                            console.warn(`No url param support for ${facet.key}`);
-                            break;
-                    }
-                }
-            });
+            facets.forEach((facet) => facet.applyOfSearchParams(url.searchParams));
             this.triggerSearch();
         });
     }
@@ -240,22 +152,16 @@ export class SearchServiceImpl implements SearchService {
             searchParams.set(URL_PARAM_SEARCH_TERM, this.#currentFilter.searchTerm);
         }
 
-        this.#currentFilter.facets.forEach((entry) => {
-            const param = `facet_${entry.facet.key}`;
-            switch (entry.facet.type) {
-                case "date":
-                    searchParams.set(param, (entry.selection as FacetDate).date.toISOString());
-                    break;
-                case "multiString":
-                    searchParams.append(param, entry.selection.key);
-                    break;
-                default:
-                    console.warn(`No url param support for ${entry.facet.key}`);
-                    break;
+        this.#currentFilter.facets.forEach((facet) => {
+            if (facet.hasActiveFilter()) {
+                facet.appendSearchParams(searchParams);
             }
         });
         const location = window.location;
-        const url = `${location.origin}?${searchParams.toString()}`;
+        let url = location.origin;
+        if (searchParams.size > 0) {
+            url += `?${searchParams.toString()}`;
+        }
         window.history.pushState(null, "", url);
     }
 }

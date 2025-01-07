@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 import {
     CatalogService,
+    DateFacet,
     Facet,
-    FacetDate,
-    FacetOption,
+    MultiSelectionFacetOption,
+    MultiSelectionFacet,
     OrderOption,
     SearchFilter,
     SearchResponse,
@@ -38,8 +39,52 @@ interface GeonodeResource {
     }[];
 }
 
-interface ExtendedFacet extends Facet {
-    filterParam: string;
+interface GeonodeCatalogFacet extends Facet {
+    addFilterParameter(params: URLSearchParams): void;
+}
+
+class GeonodeCatalogDateFacet extends DateFacet implements GeonodeCatalogFacet {
+    private filterParam: string;
+
+    constructor(key: string, label: string, filterParam: string) {
+        super(key, label);
+        this.filterParam = filterParam;
+    }
+
+    addFilterParameter(params: URLSearchParams): void {
+        if (this.date) {
+            params.append(this.filterParam, this.date.toISOString());
+        }
+    }
+}
+
+class GeonodeCatalogMultiSelectionFacet extends MultiSelectionFacet implements GeonodeCatalogFacet {
+    private filterParam: string;
+    private cbLoadOptions: (
+        key: string,
+        filter: SearchFilter
+    ) => Promise<MultiSelectionFacetOption[]>;
+
+    constructor(
+        key: string,
+        label: string,
+        filterParam: string,
+        cbLoadOptions: (key: string, filter: SearchFilter) => Promise<MultiSelectionFacetOption[]>
+    ) {
+        super(key, label);
+        this.filterParam = filterParam;
+        this.cbLoadOptions = cbLoadOptions;
+    }
+
+    addFilterParameter(params: URLSearchParams): void {
+        if (this.selections.length) {
+            this.selections.forEach((s) => params.append(this.filterParam, s));
+        }
+    }
+
+    loadFacetOptions(filter: SearchFilter): Promise<MultiSelectionFacetOption[]> {
+        return this.cbLoadOptions(this.key, filter);
+    }
 }
 
 export class GeonodeCatalogServiceImpl implements CatalogService {
@@ -70,18 +115,7 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
             params.set("sort[]", filter.order.key);
         }
 
-        if (filter.facets.length) {
-            filter.facets.forEach((e) => {
-                const { filterParam } = e.facet as ExtendedFacet;
-                if (e.facet.type === "multiString") {
-                    params.append(filterParam, e.selection.key);
-                }
-                if (e.facet.type === "date") {
-                    const option = e.selection as FacetDate;
-                    params.append(filterParam, option.date.toISOString());
-                }
-            });
-        }
+        filter.facets.forEach((facet) => (facet as GeonodeCatalogFacet).addFilterParameter(params));
 
         params.set("api_preset", "catalog_list");
         // params.set("include[]", "keywords");
@@ -123,81 +157,59 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
         );
     }
 
-    getFacets(): Promise<ExtendedFacet[]> {
+    getFacets(url: string): Promise<Facet[]> {
         // TODO: ggf. von der API laden
-        return new Promise<ExtendedFacet[]>((resolve) =>
+        return new Promise<Facet[]>((resolve) =>
             resolve([
-                {
-                    key: "category",
-                    type: "multiString",
-                    label: "Category",
-                    filterParam: "filter{category.identifier.in}"
-                },
-                {
-                    key: "keyword",
-                    type: "multiString",
-                    label: "Keyword",
-                    filterParam: "filter{keywords.slug.in}"
-                },
-                {
-                    key: "region",
-                    type: "multiString",
-                    label: "Region",
-                    filterParam: "filter{regions.code.in}"
-                },
-                {
-                    key: "group",
-                    type: "multiString",
-                    label: "Group",
-                    filterParam: "filter{group.in}"
-                },
-                {
-                    key: "owner",
-                    type: "multiString",
-                    label: "Owner",
-                    filterParam: "filter{owner.pk.in}"
-                },
-                {
-                    key: "date_from",
-                    type: "date",
-                    label: "Date from",
-                    filterParam: "filter{date.gte}"
-                },
-                {
-                    key: "date_to",
-                    type: "date",
-                    label: "Date to",
-                    filterParam: "filter{date.lte}"
-                }
+                new GeonodeCatalogMultiSelectionFacet(
+                    "category",
+                    "Category",
+                    "filter{category.identifier.in}",
+                    (key, filter) => this.loadFacetOptions(key, url, filter)
+                ),
+                new GeonodeCatalogMultiSelectionFacet(
+                    "keyword",
+                    "Keyword",
+                    "filter{keywords.slug.in}",
+                    (key, filter) => this.loadFacetOptions(key, url, filter)
+                ),
+                new GeonodeCatalogMultiSelectionFacet(
+                    "region",
+                    "Region",
+                    "filter{regions.code.in}",
+                    (key, filter) => this.loadFacetOptions(key, url, filter)
+                ),
+                new GeonodeCatalogMultiSelectionFacet(
+                    "group",
+                    "Group",
+                    "filter{group.in}",
+                    (key, filter) => this.loadFacetOptions(key, url, filter)
+                ),
+                new GeonodeCatalogMultiSelectionFacet(
+                    "owner",
+                    "Owner",
+                    "filter{owner.pk.in}",
+                    (key, filter) => this.loadFacetOptions(key, url, filter)
+                ),
+                new GeonodeCatalogDateFacet("date_from", "Date from", "filter{date.gte}"),
+                new GeonodeCatalogDateFacet("date_to", "Date to", "filter{date.lte}")
             ])
         );
     }
 
-    loadFacetOptions(
-        facet: ExtendedFacet,
+    private loadFacetOptions(
+        key: string,
         url: string,
         filter: SearchFilter
-    ): Promise<FacetOption[]> {
+    ): Promise<MultiSelectionFacetOption[]> {
         const params = new URLSearchParams();
 
         params.set("page", "0");
         params.set("page_size", "10");
 
-        if (filter.facets.length) {
-            filter.facets.forEach((e) => {
-                if (e.facet.type === "multiString") {
-                    const { filterParam } = e.facet as ExtendedFacet;
-                    params.append(filterParam, e.selection.key);
-                }
-                if (e.facet.type === "date") {
-                    const { filterParam } = e.facet as ExtendedFacet;
-                    const { date } = e.selection as FacetDate;
-                    params.append(filterParam, date.toISOString());
-                }
-            });
-        }
+        filter.facets.forEach((facet) => (facet as GeonodeCatalogFacet).addFilterParameter(params));
 
-        const fetchUrl = `${url}facets/${facet.key}?${params}`;
+        const fetchUrl = `${url}facets/${key}?${params}`;
 
         return this.httpService
             .fetch(fetchUrl)
