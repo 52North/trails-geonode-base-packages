@@ -69,9 +69,6 @@ catalogs:
     '@open-pioneer/scale-viewer':
       specifier: ^0.8.0
       version: 0.8.0
-    '@open-pioneer/test-utils':
-      specifier: ^2.4.0
-      version: 2.4.0
     '@open-pioneer/theme':
       specifier: ^0.8.0
       version: 0.8.0
@@ -406,9 +403,6 @@ importers:
       react-datepicker:
         specifier: 'catalog:'
         version: 7.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      sample-package:
-        specifier: workspace:^
-        version: link:../../packages/sample-package
 
   src/packages/catalog:
     dependencies:
@@ -424,16 +418,6 @@ importers:
       catalog:
         specifier: workspace:^
         version: link:../catalog
-
-  src/packages/sample-package:
-    dependencies:
-      '@open-pioneer/runtime':
-        specifier: 'catalog:'
-        version: 2.4.0(@emotion/is-prop-valid@1.3.0)(@types/react@18.3.11)(typescript@5.6.3)
-    devDependencies:
-      '@open-pioneer/test-utils':
-        specifier: 'catalog:'
-        version: 2.4.0(@emotion/is-prop-valid@1.3.0)(@types/react-dom@18.3.1)(@types/react@18.3.11)(typescript@5.6.3)
 
   src/samples/i18n-howto/app:
     dependencies:
@@ -1294,9 +1278,6 @@ packages:
 
   '@open-pioneer/scale-viewer@0.8.0':
     resolution: {integrity: sha512-HBBkmB1207yhsXOFa1W7ncKJcihR6wh8+rM04JYDN28eLGMOuI0vL5WwGfWuHAPxRO0fJAEFqCKpNcv2KOrDFg==}
-
-  '@open-pioneer/test-utils@2.4.0':
-    resolution: {integrity: sha512-GdfuP+ejFMJEW3q49ofWpQdn1BJhtmU/UiuCTAlpUzDmBofwXAla6hTLnIj8EhFR+MfdryjsKY02iY+gxbP4Qw==}
 
   '@open-pioneer/theme@0.8.0':
     resolution: {integrity: sha512-w4Ir/SNGPLMX+swLBgXWdZpD0vNCREO8GwAMogfAZvcL/2fuaMeU65CTGSnSnnb9gOX22zMND24KcW+U0mmbxw==}
@@ -5331,21 +5312,6 @@ snapshots:
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
       - '@types/react'
-      - typescript
-
-  '@open-pioneer/test-utils@2.4.0(@emotion/is-prop-valid@1.3.0)(@types/react-dom@18.3.1)(@types/react@18.3.11)(typescript@5.6.3)':
-    dependencies:
-      '@formatjs/intl': 2.10.15(typescript@5.6.3)
-      '@open-pioneer/chakra-integration': 2.4.0(@emotion/is-prop-valid@1.3.0)(@types/react@18.3.11)
-      '@open-pioneer/runtime-react-support': 2.4.0
-      '@testing-library/dom': 10.4.0
-      '@testing-library/react': 16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.1)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-    transitivePeerDependencies:
-      - '@emotion/is-prop-valid'
-      - '@types/react'
-      - '@types/react-dom'
       - typescript
 
   '@open-pioneer/theme@0.8.0(@emotion/is-prop-valid@1.3.0)(@types/react@18.3.11)(typescript@5.6.3)':

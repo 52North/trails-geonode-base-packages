@@ -10,7 +10,6 @@
         "catalog": "workspace:^",
         "geonode-catalog": "workspace:^",
         "ol": "catalog:",
-        "react-datepicker": "catalog:",
-        "sample-package": "workspace:^"
+        "react-datepicker": "catalog:"
     }
 }
