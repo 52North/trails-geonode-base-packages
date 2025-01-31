@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { Reactive, reactive } from "@conterra/reactivity-core";
 import { DeclaredService, ServiceOptions } from "@open-pioneer/runtime";
-import { CatalogService, Facet, OrderOption, SearchFilter, SearchResultEntry } from "catalog";
+import { CatalogService, OrderOption, SearchFilter, SearchResultEntry } from "catalog";
 import { NotificationService } from "@open-pioneer/notifier";
 import { API_URL, URL_PARAM_SEARCH_TERM } from "../constants";
 
@@ -16,7 +16,6 @@ export interface SearchService extends DeclaredService<"SearchService"> {
     results: SearchResultEntry[] | undefined;
     resultCount: number;
     currentFilter: SearchFilter;
-    facets: Facet[];
     hasActiveFilter: boolean;
     set pageSize(pageSize: number);
     set searchTerm(searchTerm: string | undefined);
@@ -37,8 +36,6 @@ export class SearchServiceImpl implements SearchService {
     #results: Reactive<SearchResultEntry[] | undefined> = reactive();
 
     #resultCount: Reactive<number> = reactive(0);
-
-    #facets: Reactive<Facet[]> = reactive([]);
 
     #currentFilter: SearchFilter = {
         pageSize: 5,
@@ -65,10 +62,6 @@ export class SearchServiceImpl implements SearchService {
 
     get currentFilter(): SearchFilter {
         return this.#currentFilter;
-    }
-
-    get facets(): Facet[] {
-        return this.#facets.value;
     }
 
     set searchTerm(term: string | undefined) {
@@ -152,7 +145,6 @@ export class SearchServiceImpl implements SearchService {
         }
         this.catalogSrvc.getFacets(API_URL).then((facets) => {
             this.#currentFilter.facets = facets;
-            this.#facets.value = facets;
             facets.forEach((facet) => facet.applyOfSearchParams(url.searchParams));
             this.triggerSearch();
         });

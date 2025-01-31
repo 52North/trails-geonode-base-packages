@@ -25,8 +25,13 @@ import { useOnMountUnsafe } from "../components/helper";
 
 export function SearchView() {
     const searchSrvc = useService<SearchService>("SearchService");
-    const [results, loading, resultCount, facets] = useReactiveSnapshot(
-        () => [searchSrvc.results, searchSrvc.searching, searchSrvc.resultCount, searchSrvc.facets],
+    const [results, loading, resultCount, currentFilter] = useReactiveSnapshot(
+        () => [
+            searchSrvc.results,
+            searchSrvc.searching,
+            searchSrvc.resultCount,
+            searchSrvc.currentFilter
+        ],
         [searchSrvc]
     );
 
@@ -46,7 +51,9 @@ export function SearchView() {
                 </Center>
                 <Grid templateColumns="400px 1fr" gap={2}>
                     <GridItem w="100%">
-                        {facets?.map((f) => <FacetComp key={f.key} facet={f}></FacetComp>)}
+                        {currentFilter.facets.map((f) => (
+                            <FacetComp key={f.key} facet={f}></FacetComp>
+                        ))}
                     </GridItem>
                     <GridItem w="100%">
                         <VStack>
