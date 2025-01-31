@@ -13,7 +13,12 @@ import { DateFacetComp } from "./DateFacet";
 import { MultiSelectFacet } from "./MultiSelectFacet";
 import { DateFacet, Facet, MultiSelectionFacet } from "catalog";
 
-export function FacetComp(props: { facet: Facet }) {
+export function FacetList(props: { facets: Facet[] }) {
+    const { facets } = props;
+    return facets.map((f) => <FacetComp key={f.key} facet={f}></FacetComp>);
+}
+
+function FacetComp(props: { facet: Facet }) {
     const { facet } = props;
 
     return (

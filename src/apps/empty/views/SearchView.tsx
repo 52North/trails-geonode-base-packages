@@ -20,8 +20,8 @@ import { ResultEntry } from "../components/ResultEntry";
 import { PageSizeSelection } from "../components/PageSizeSelection";
 import { InfinitePageLoad } from "../components/InfinitePageLoad";
 import { Ordering } from "../components/Ordering";
-import { FacetComp } from "../components/facets/Facet";
 import { useOnMountUnsafe } from "../components/helper";
+import { FacetList } from "../components/facets/FacetList";
 
 export function SearchView() {
     const searchSrvc = useService<SearchService>("SearchService");
@@ -53,9 +53,7 @@ export function SearchView() {
             <Container maxW="8xl" p={5} overflow="hidden">
                 <Grid templateColumns="400px 1fr" gap={2} overflow="hidden" height="100%">
                     <GridItem w="100%" overflow="auto">
-                        {currentFilter.facets.map((f) => (
-                            <FacetComp key={f.key} facet={f}></FacetComp>
-                        ))}
+                        <FacetList facets={currentFilter.facets} />
                     </GridItem>
                     <GridItem w="100%" overflow="auto">
                         <VStack>
