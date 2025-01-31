@@ -28,11 +28,9 @@ export function GeoResultMap(props: GeoResultMapProps) {
     }, [map, result]);
 
     return (
-        <>
-            <Box height={"100%"}>
-                <MapContainer mapId={RESULT_PREVIEW_MAP_ID}></MapContainer>
-            </Box>
-        </>
+        <Box height="100%" width="100%">
+            <MapContainer mapId={RESULT_PREVIEW_MAP_ID}></MapContainer>
+        </Box>
     );
 
     function setExtent(map: MapModel) {

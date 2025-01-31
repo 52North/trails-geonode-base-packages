@@ -16,6 +16,13 @@ export interface SearchResultEntry {
     type: string;
     subType?: string;
     alternate?: string;
+    date?: string;
+    created?: string;
+    lastUpdated?: string;
+    owner?: Owner;
+    sourceType?: string;
+    language?: string;
+    supplementalInformation?: string;
     extent?: {
         coords: number[];
         srid: string;
@@ -27,6 +34,12 @@ export interface SearchResultEntry {
         mime: string;
         url: string;
     }[];
+}
+
+export interface Owner {
+    username?: string;
+    firstName?: string;
+    lastName?: string;
 }
 
 export interface SearchResponse {

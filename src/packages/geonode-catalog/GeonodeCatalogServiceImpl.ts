@@ -30,6 +30,23 @@ interface GeonodeResource {
         srid: string;
     };
     alternate?: string;
+    date?: string;
+    created?: string;
+    last_updated?: string;
+    sourcetype?: string;
+    supplemental_information?: string;
+    language?: string;
+    owner?: {
+        pk?: number;
+        username?: string;
+        first_name?: string;
+        last_name?: string;
+        avatar?: string;
+        is_superuser?: boolean;
+        is_staff?: boolean;
+        email?: string;
+        link?: string;
+    };
     links?: {
         extension: string;
         link_type: string;
@@ -253,7 +270,18 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
             subType: res.subtype,
             extent: res.extent,
             alternate: res.alternate,
-            links: res.links
+            links: res.links,
+            date: res.date,
+            created: res.created,
+            lastUpdated: res.last_updated,
+            owner: {
+                firstName: res.owner?.first_name,
+                lastName: res.owner?.last_name,
+                username: res.owner?.username
+            },
+            sourceType: res.sourcetype,
+            language: res.language,
+            supplementalInformation: res.supplemental_information
         };
     }
 }
