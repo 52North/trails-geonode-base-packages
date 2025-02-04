@@ -3,3 +3,7 @@
 
 export { SearchServiceImpl } from "./services/search-service";
 export { ResultPreviewMapProvider } from "./services/result-preview-map-provider";
+export {
+    FacetExtentMapProvider,
+    FacetExtentModalMapProvider
+} from "./services/facet-extent-map-provider";

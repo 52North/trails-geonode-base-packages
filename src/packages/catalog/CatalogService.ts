@@ -154,6 +154,66 @@ export abstract class MultiSelectionFacet extends Facet {
     }
 }
 
+export interface GeometryExtent {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+}
+
+export abstract class GeometryExtentFacet extends Facet {
+    protected extent?: GeometryExtent;
+
+    hasActiveFilter(): boolean {
+        return this.extent !== undefined;
+    }
+
+    getExtent(): GeometryExtent | undefined {
+        return this.extent;
+    }
+
+    setExtent(extent: GeometryExtent): void {
+        this.extent = extent;
+    }
+
+    clearFilter(): void {
+        this.extent = undefined;
+    }
+
+    appendSearchParams(params: URLSearchParams): void {
+        if (this.extent) {
+            params.append(
+                this.paramKey,
+                `${this.extent.left},${this.extent.top},${this.extent.right},${this.extent.bottom}`
+            );
+        }
+    }
+
+    applyOfSearchParams(params: URLSearchParams): void {
+        const matchedParam = params.get(this.paramKey);
+        if (matchedParam) {
+            const [left, top, right, bottom] = matchedParam.split(",");
+            if (
+                left !== undefined &&
+                top !== undefined &&
+                bottom !== undefined &&
+                right !== undefined
+            ) {
+                try {
+                    this.extent = {
+                        top: parseFloat(top),
+                        bottom: parseFloat(bottom),
+                        left: parseFloat(left),
+                        right: parseFloat(right)
+                    };
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        }
+    }
+}
+
 export interface SearchFilter {
     searchTerm?: string;
     pageSize?: number;

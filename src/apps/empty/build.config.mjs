@@ -22,6 +22,12 @@ export default defineBuildConfig({
         },
         ResultPreviewMapProvider: {
             provides: ["map.MapConfigProvider"]
+        },
+        FacetExtentMapProvider: {
+            provides: ["map.MapConfigProvider"]
+        },
+        FacetExtentModalMapProvider: {
+            provides: ["map.MapConfigProvider"]
         }
     }
 });

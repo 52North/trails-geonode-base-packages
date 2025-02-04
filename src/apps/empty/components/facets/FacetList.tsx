@@ -11,7 +11,8 @@ import {
 } from "@open-pioneer/chakra-integration";
 import { DateFacetComp } from "./DateFacet";
 import { MultiSelectFacet } from "./MultiSelectFacet";
-import { DateFacet, Facet, MultiSelectionFacet } from "catalog";
+import { DateFacet, Facet, GeometryExtentFacet, MultiSelectionFacet } from "catalog";
+import { GeometryExtentFacetComp } from "./GeometryExtentFacet";
 
 export function FacetList(props: { facets: Facet[] }) {
     const { facets } = props;
@@ -46,15 +47,13 @@ function FacetComp(props: { facet: Facet }) {
 
     function getFacetContent(isExpanded: boolean) {
         if (facet instanceof DateFacet) {
-            return <DateFacetComp dateFacet={facet}></DateFacetComp>;
+            return <DateFacetComp dateFacet={facet} />;
         }
         if (facet instanceof MultiSelectionFacet) {
-            return (
-                <MultiSelectFacet
-                    multiSelectionFacet={facet}
-                    isExpanded={isExpanded}
-                ></MultiSelectFacet>
-            );
+            return <MultiSelectFacet multiSelectionFacet={facet} isExpanded={isExpanded} />;
+        }
+        if (facet instanceof GeometryExtentFacet) {
+            return <GeometryExtentFacetComp facet={facet} isExpanded={isExpanded} />;
         }
         console.error("Could not find facet type");
         return <></>;

@@ -9,7 +9,8 @@ import {
     OrderOption,
     SearchFilter,
     SearchResponse,
-    SearchResultEntry
+    SearchResultEntry,
+    GeometryExtentFacet
 } from "catalog";
 import type { ServiceOptions } from "@open-pioneer/runtime";
 import { HttpService } from "@open-pioneer/http";
@@ -101,6 +102,17 @@ class GeonodeCatalogMultiSelectionFacet extends MultiSelectionFacet implements G
 
     loadFacetOptions(filter: SearchFilter): Promise<MultiSelectionFacetOption[]> {
         return this.cbLoadOptions(this.key, filter);
+    }
+}
+
+class GeonodeCatalogGeometryExtentFacet extends GeometryExtentFacet implements GeonodeCatalogFacet {
+    addFilterParameter(params: URLSearchParams): void {
+        if (this.extent) {
+            params.append(
+                this.key,
+                `${this.extent.left},${this.extent.top},${this.extent.right},${this.extent.bottom}`
+            );
+        }
     }
 }
 
@@ -209,7 +221,8 @@ export class GeonodeCatalogServiceImpl implements CatalogService {
                     (key, filter) => this.loadFacetOptions(key, url, filter)
                 ),
                 new GeonodeCatalogDateFacet("date_from", "Date from", "filter{date.gte}"),
-                new GeonodeCatalogDateFacet("date_to", "Date to", "filter{date.lte}")
+                new GeonodeCatalogDateFacet("date_to", "Date to", "filter{date.lte}"),
+                new GeonodeCatalogGeometryExtentFacet("extent", "Extent")
             ])
         );
     }
