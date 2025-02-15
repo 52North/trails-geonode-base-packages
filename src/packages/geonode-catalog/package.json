@@ -3,6 +3,8 @@
     "private": true,
     "dependencies": {
         "@open-pioneer/http": "catalog:",
-        "catalog": "workspace:^"
+        "@open-pioneer/runtime": "catalog:",
+        "geonode-core": "workspace:^",
+        "geonode-search": "workspace:^"
     }
 }

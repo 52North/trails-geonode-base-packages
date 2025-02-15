@@ -7,7 +7,6 @@ import react from "@vitejs/plugin-react-swc";
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import eslint from "vite-plugin-eslint";
-import checker from "vite-plugin-checker";
 
 // Minimum browser versions supported by generated JS/CSS
 // See also:
@@ -15,7 +14,7 @@ import checker from "vite-plugin-checker";
 // - https://esbuild.github.io/api/#target
 const targets = ["chrome92", "edge92", "firefox91", "safari14"];
 
-const sampleSites = ["samples/map-sample", "samples/i18n-howto"];
+const sampleSites = ["samples/catalog"];
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -47,8 +46,6 @@ export default defineConfig(({ mode }) => {
 
                 // Additional directories to include as html (must contain index.html files)
                 sites: [
-                    "sites/empty",
-
                     // Include sample sites in the build
                     ...sampleSites
                 ],
@@ -56,11 +53,12 @@ export default defineConfig(({ mode }) => {
                 // Apps to distribute as .js files for embedded use cases
                 apps: []
             }),
-            react(),
-            eslint(),
-            checker({
-                typescript: true
-            })
+            react({
+                // react swc plugin transpiles during development.
+                // using a recent target allows for better debugging of recent features like private properties (`this.#abc`)
+                devTarget: "es2022"
+            }),
+            eslint()
         ],
 
         // Ignore irrelevant deprecations.
@@ -84,15 +82,7 @@ export default defineConfig(({ mode }) => {
         test: {
             globals: true,
             environment: "happy-dom",
-            setupFiles: ["testing/global-setup.ts"],
-
-            server: {
-                deps: {
-                    // Workaround to fix some import issues, see
-                    // https://github.com/open-pioneer/trails-openlayers-base-packages/issues/314
-                    inline: [/@open-pioneer[/\\]/]
-                }
-            }
+            setupFiles: ["testing/global-setup.ts"]
         },
 
         // prettier-ignore

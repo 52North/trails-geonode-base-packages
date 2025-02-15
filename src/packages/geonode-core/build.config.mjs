@@ -4,12 +4,13 @@ import { defineBuildConfig } from "@open-pioneer/build-support";
 
 export default defineBuildConfig({
     services: {
-        GeonodeCatalogServiceImpl: {
-            provides: "geonode-catalog.CatalogService",
-            references: {
-                httpService: "http.HttpService",
-                configService: "geonode-core.ConfigService"
-            }
+        GeoNodeConfigServiceImpl: {
+            provides: ["geonode-core.ConfigService"]
+        }
+    },
+    properties: {
+        geonodeOptions: {
+            geonodeConfig: null
         }
     }
 });

@@ -1,0 +1,17 @@
+{
+    "name": "catalog-app",
+    "private": true,
+    "dependencies": {
+        "@open-pioneer/chakra-integration": "catalog:",
+        "@open-pioneer/http": "catalog:",
+        "@open-pioneer/map-navigation": "catalog:",
+        "@open-pioneer/map": "catalog:",
+        "@open-pioneer/notifier": "catalog:",
+        "@open-pioneer/reactivity": "catalog:",
+        "@open-pioneer/runtime": "catalog:",
+        "geonode-catalog": "workspace:^",
+        "geonode-search": "workspace:^",
+        "ol": "catalog:",
+        "react-datepicker": "catalog:"
+    }
+}

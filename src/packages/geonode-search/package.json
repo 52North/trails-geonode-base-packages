@@ -1,0 +1,11 @@
+{
+    "name": "geonode-search",
+    "private": true,
+    "dependencies": {
+        "@open-pioneer/http": "catalog:",
+        "@open-pioneer/notifier": "catalog:",
+        "@open-pioneer/runtime": "catalog:",
+        "geonode-catalog": "workspace:^",
+        "geonode-core": "workspace:^"
+    }
+}
