@@ -1,0 +1,10 @@
+{
+    "name": "geonode-core",
+    "private": true,
+    "main": "index.ts",
+    "dependencies": {
+        "@open-pioneer/authentication": "catalog:",
+        "@open-pioneer/runtime": "catalog:",
+        "geonode-core": "workspace:^"
+    }
+}

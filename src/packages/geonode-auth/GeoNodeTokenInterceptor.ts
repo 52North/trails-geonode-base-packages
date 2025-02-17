@@ -3,7 +3,7 @@
 import { BeforeRequestParams, Interceptor } from "@open-pioneer/http";
 import { AuthService } from "@open-pioneer/authentication";
 import { ServiceOptions } from "@open-pioneer/runtime";
-import { GeoNodeConfigService, GeoNodeConfig } from ".";
+import { GeoNodeConfig, GeoNodeConfigService } from "geonode-core";
 
 /**
  * This interceptor adds an example token to certain requests.
