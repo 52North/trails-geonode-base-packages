@@ -13,6 +13,8 @@ __versions:
 
 # https://pnpm.io/catalogs
 catalog:
+  "@conterra/reactivity-core": ^0.4.3
+  
   # Trails OpenLayers base packages
   # https://github.com/open-pioneer/trails-openlayers-base-packages
   "@open-pioneer/basemap-switcher": *ol_base_packages_version

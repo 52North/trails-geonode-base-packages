@@ -1,0 +1,20 @@
+{
+    "name": "authentication-pkce",
+    "version": "1.0.0",
+    "license": "Apache-2.0",
+    "main": "index.ts",
+    "keywords": [
+        "open-pioneer-trails",
+        "oauth2-pkce"
+    ],
+    "private": true,
+    "dependencies": {
+        "@conterra/reactivity-core": "catalog:",
+        "@open-pioneer/authentication": "catalog:",
+        "@open-pioneer/core": "catalog:",
+        "@open-pioneer/notifier": "catalog:",
+        "@open-pioneer/runtime": "catalog:",
+        "jwt-decode": "^4.0.0",
+        "oauth2-pkce": "^2.1.3"
+    }
+}

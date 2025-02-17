@@ -3,8 +3,10 @@
     "private": true,
     "main": "index.ts",
     "dependencies": {
+        "@conterra/reactivity-core": "catalog:",
         "@open-pioneer/authentication": "catalog:",
         "@open-pioneer/runtime": "catalog:",
+        "authentication-pkce": "workspace:^",
         "geonode-core": "workspace:^"
     }
 }

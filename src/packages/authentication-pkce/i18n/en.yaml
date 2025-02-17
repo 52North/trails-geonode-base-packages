@@ -1,0 +1,4 @@
+messages:
+  loginFailed:
+    title: Login failed!
+    message: "Could not login due to internal error"
