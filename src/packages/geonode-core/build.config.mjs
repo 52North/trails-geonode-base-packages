@@ -6,6 +6,13 @@ export default defineBuildConfig({
     services: {
         GeoNodeConfigServiceImpl: {
             provides: ["geonode-core.ConfigService"]
+        },
+        GeoNodeTokenInterceptor: {
+            provides: ["http.Interceptor"],
+            references: {
+                authService: "authentication.AuthService",
+                configService: "geonode.ConfigService"
+            }
         }
     },
     properties: {
