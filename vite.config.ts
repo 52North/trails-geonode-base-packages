@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => {
         envDir: __dirname,
 
         // Generates relative urls in html etc.
-        base: "./",
+        base: process.env.BASENAME || "./",
 
         // Vite's build output is written to dist/www
         build: {
