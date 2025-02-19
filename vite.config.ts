@@ -14,7 +14,7 @@ import eslint from "vite-plugin-eslint";
 // - https://esbuild.github.io/api/#target
 const targets = ["chrome92", "edge92", "firefox91", "safari14"];
 
-const sampleSites = ["samples/catalog"];
+const sampleSites = ["samples/catalog", "samples/pkce-auth"];
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
