@@ -39,6 +39,15 @@ jobs:
 
       - name: Build app
         run: pnpm build
+        env: 
+          VITE_GEONODE_BASE_URL: ${{vars.GEONODE_BASE_URL}}
+          VITE_PKCE_CONFIG_REDIRECT_URL: ${{vars.VITE_PKCE_CONFIG_REDIRECT_URL}}
+          VITE_PKCE_CONFIG_CLIENT_ID: ${{vars.VITE_PKCE_CONFIG_CLIENT_ID}}
+          VITE_PKCE_CONFIG_SCOPES: ${{vars.VITE_PKCE_CONFIG_SCOPES}}
+          VITE_PKCE_CONFIG_STORE_REFRESH_TOKEN: ${{vars.VITE_PKCE_CONFIG_STORE_REFRESH_TOKEN}}
+
+          VITE_PKCE_REFRESH_OPTIONS_AUTO_REFRESH: ${{vars.VITE_PKCE_REFRESH_OPTIONS_AUTO_REFRESH}}
+          VITE_PKCE_REFRESH_OPTIONS_INTERVAL: ${{vars.VITE_PKCE_REFRESH_OPTIONS_INTERVAL}}
 
       - name: Build API documentation
         run: pnpm build-docs

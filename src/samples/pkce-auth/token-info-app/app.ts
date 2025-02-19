@@ -6,6 +6,7 @@ import { PkceOptions } from "authentication-pkce";
 import { GeoNodeProperties } from "geonode-core";
 import { AppUI } from "./AppUI";
 
+const GEONODE_BASE_URL = import.meta.env.VITE_GEONODE_BASE_URL;
 const Element = createCustomElement({
     component: AppUI,
     appMetadata,
@@ -14,16 +15,16 @@ const Element = createCustomElement({
             "geonode-core": {
                 geonodeOptions: {
                     geonodeConfig: {
-                        baseUrl: import.meta.env.VITE_GEONODE_BASE_URL
+                        baseUrl: GEONODE_BASE_URL
                     }
                 }
             } satisfies GeoNodeProperties,
             "authentication-pkce": {
                 pkceOptions: {
                     pkceConfig: {
-                        authorizationUrl: import.meta.env.VITE_PKCE_CONFIG_AUTHORIZATION_URL,
-                        revokeTokenUrl: import.meta.env.VITE_PKCE_CONFIG_REVOKE_URL,
-                        tokenUrl: import.meta.env.VITE_PKCE_CONFIG_TOKEN_URL
+                        authorizationUrl: `${GEONODE_BASE_URL}/o/authorize/`,
+                        revokeTokenUrl: `${GEONODE_BASE_URL}/o/revoke_token/`,
+                        tokenUrl: `${GEONODE_BASE_URL}/o/token/`
                     },
                     clientConfig: {
                         clientId: import.meta.env.VITE_PKCE_CONFIG_CLIENT_ID,
