@@ -9,28 +9,31 @@ import {
 } from "@open-pioneer/authentication";
 import { Resource, createLogger, destroyResource } from "@open-pioneer/core";
 import { NotificationService } from "@open-pioneer/notifier";
-import { PackageIntl, Service, ServiceOptions } from "@open-pioneer/runtime";
+import { LocalStorageService } from "@open-pioneer/local-storage";
+import { PackageIntl, ServiceOptions } from "@open-pioneer/runtime";
 import { jwtDecode, JwtPayload } from "jwt-decode";
-import { AccessContext, Configuration, OAuth2AuthCodePkceClient } from "oauth2-pkce";
-import { PkceOptions, PkceProperties, RefreshOptions } from "./api";
+import { OpenIdClaims, PkceOptions, PkceProperties, RefreshOptions } from "./api";
+import { AccessContext, PkceAuthClient } from "./PkceAuthClient";
 
 const LOG = createLogger("authentication-pkce:PkceAuthPlugin");
 
 interface References {
+    pkceOptions: PkceOptions;
     notifier: NotificationService;
+    storage: LocalStorageService;
 }
 
-export class PkceAuthPluginImpl implements Service, AuthPlugin {
+export class PkceAuthPluginImpl implements AuthPlugin {
     #notifier: NotificationService;
     #intl: PackageIntl;
     #pkceOptions: PkceOptions;
-    #oauthClient: OAuth2AuthCodePkceClient;
+    #oauthClient: PkceAuthClient;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     #timerId: any;
     #watcher: Resource | undefined;
 
     #state = reactive<AuthState>({
-        kind: "pending"
+        kind: "not-authenticated"
     });
 
     constructor(options: ServiceOptions<References>) {
@@ -44,34 +47,27 @@ export class PkceAuthPluginImpl implements Service, AuthPlugin {
         }
 
         try {
-            const config = this.#pkceOptions.pkceConfig;
-            this.#oauthClient = new OAuth2AuthCodePkceClient(config);
+            const notifier = this.#notifier;
+            const pkceOptions = this.#pkceOptions;
+            const storage = options.references.storage;
+            this.#oauthClient = new PkceAuthClient(pkceOptions, notifier, storage);
         } catch (e) {
             throw new Error("Failed to construct pkce client!", { cause: e });
         }
 
         const oauthClient = this.#oauthClient;
-        /* eslint-disable  @typescript-eslint/no-explicit-any */
-        const patchedClient = oauthClient as any;
-        patchedClient.ready.then(() => {
-            if (oauthClient.isReturningFromAuthServer()) {
-                this.#receiveCode().then(() => {
-                    delete patchedClient.state.authorizationCode;
-                    delete patchedClient.state.codeChallenge;
-                    delete patchedClient.state.codeVerifier;
-                    delete patchedClient.state.code;
-                    patchedClient.saveState().then(() => {
-                        const location = window.location;
-                        const query = new URLSearchParams(location.search);
-                        query.delete("code");
-                        query.delete("state");
-                        location.search = query.size ? query.toString() : "";
-                    });
-                });
-            } else {
-                this.#restoreState();
-            }
-        });
+        if (oauthClient.isReturningFromAuthServer()) {
+            this.#receiveCode().then(() => {
+                const url = new URL(location.href);
+                const query = url.searchParams;
+                // clean URL from oauth params
+                query.delete("code");
+                query.delete("state");
+                history.pushState({}, "", url);
+            });
+        } else {
+            this.#restoreState();
+        }
     }
 
     destroy() {
@@ -88,6 +84,7 @@ export class PkceAuthPluginImpl implements Service, AuthPlugin {
         const doLogin = async () => {
             this.startCodeFlow();
         };
+
         return {
             kind: "effect",
             login: doLogin
@@ -95,7 +92,7 @@ export class PkceAuthPluginImpl implements Service, AuthPlugin {
     }
 
     logout(): void {
-        this.#oauthClient.reset();
+        this.#oauthClient.logout();
         this.#updateState({
             kind: "not-authenticated"
         });
@@ -121,28 +118,31 @@ export class PkceAuthPluginImpl implements Service, AuthPlugin {
     }
 
     async #receiveCode() {
-        return this.#oauthClient
-            .receiveCode()
-            .then(async () => {
-                const client = this.#oauthClient;
-                const tokens = await client.getTokens();
-                this.#authenticate(tokens);
-            })
-            .catch((e) => {
-                const error = typeof e === "string" ? new Error(e) : e;
-                throw new Error("Failed to initialize PKCE session", { cause: error });
-            });
+        const client = this.#oauthClient;
+        client.receiveCode();
+        const tokens = await client.getTokens();
+        this.#authenticate(tokens);
     }
 
     #restoreState() {
         const oauthClient = this.#oauthClient;
         if (oauthClient.isAuthorized()) {
-            if (oauthClient.isAccessTokenExpired()) {
+            if (oauthClient.isExpiredAccessToken()) {
                 oauthClient
                     .exchangeRefreshTokenForAccessToken()
-                    .then((ctx) => this.#authenticate(ctx));
+                    .then((ctx) => this.#authenticate(ctx))
+                    .catch((error) => {
+                        this.#notifier.error({ message: "Token exchange failed!" });
+                        console.error(error);
+                    });
             } else {
-                oauthClient.getTokens().then((ctx) => this.#authenticate(ctx));
+                oauthClient
+                    .getTokens()
+                    .then((ctx) => this.#authenticate(ctx))
+                    .catch((error) => {
+                        this.#notifier.error({ message: "Token exchange failed!" });
+                        console.error(error);
+                    });
             }
         }
     }
@@ -150,18 +150,23 @@ export class PkceAuthPluginImpl implements Service, AuthPlugin {
     #authenticate(ctx: AccessContext) {
         const pkceOptions = this.#pkceOptions;
         const refreshOptions = pkceOptions.refreshOptions;
-        const idTokenParsed = jwtDecode<JwtPayload>(ctx.idToken!);
+        const idTokenParsed = jwtDecode<OpenIdClaims>(ctx.idToken!);
+        const issuedAt: number = idTokenParsed.iat ?? 0;
+        const expiresIn: number = idTokenParsed.exp ?? 0;
         const authState: AuthStateAuthenticated = {
             kind: "authenticated",
             sessionInfo: {
                 userId: idTokenParsed.sub ?? "undefined",
-                //userName: this.#keycloak.idTokenParsed?.preferred_username,
+                userName: idTokenParsed.preferred_username ?? "",
                 attributes: {
+                    issuer: idTokenParsed.iss ?? "unknown",
+                    familyName: idTokenParsed.family_name ?? "",
+                    givenName: idTokenParsed.given_name ?? "",
                     accessToken: ctx.accessToken,
-                    issuer: idTokenParsed.iss ?? "undefined"
-                    //     familyName: this.#keycloak.idTokenParsed?.family_name,
-                    //     givenName: this.#keycloak.idTokenParsed?.given_name,
-                    //     userName: this.#keycloak.idTokenParsed?.preferred_username
+                    // NumericDate are in seconds
+                    // see https://www.rfc-editor.org/rfc/rfc7519#section-2
+                    expiresAt: new Date(expiresIn * 1000),
+                    issuedAt: new Date(issuedAt * 1000)
                 }
             }
         };
@@ -180,42 +185,19 @@ export class PkceAuthPluginImpl implements Service, AuthPlugin {
 
     #getPkceConfig(properties: Partial<PkceProperties>): PkceOptions {
         const { pkceOptions } = properties;
-        const { scopes, pkceConfig, refreshOptions } = pkceOptions!;
+        const { pkceConfig, clientConfig, refreshOptions } = pkceOptions!;
         return {
-            pkceConfig: {
-                ...parsePkceConfig(
-                    Object.assign(pkceConfig, {
-                        onAccessTokenExpiry: this.#onAccessTokenExpiry,
-                        onInvalidGrant: this.#onInvalidLogin,
-                        onInvalidToken: this.#onInvalidLogin
-                    })
-                ),
-                scopes: Array.isArray(scopes) ? scopes : (scopes?.split(",") ?? ["openid"])
-            },
+            pkceConfig: { ...pkceConfig },
+            clientConfig: { ...clientConfig },
             refreshOptions: parseRefreshOptions(refreshOptions)
         };
-    }
-
-    #onAccessTokenExpiry(): Promise<AccessContext> {
-        this.#notifier.notify({
-            level: "error",
-            message: "Token has expired! Please re-login and try again."
-        });
-        return Promise.resolve({});
-    }
-
-    #onInvalidLogin(): void {
-        this.#notifier.notify({
-            level: "error",
-            message: "Login not succeeded!"
-        });
     }
 
     private __refresh(interval: number) {
         clearInterval(this.#timerId);
         this.#timerId = setInterval(() => {
             const oauthClient = this.#oauthClient;
-            if (oauthClient.isAccessTokenExpired()) {
+            if (oauthClient.isExpiredAccessToken()) {
                 oauthClient
                     .exchangeRefreshTokenForAccessToken()
                     .then((ctx) => this.#authenticate(ctx))
@@ -231,16 +213,11 @@ export class PkceAuthPluginImpl implements Service, AuthPlugin {
     }
 }
 
-function parsePkceConfig(pkceConfig: Configuration) {
-    return {
-        ...pkceConfig,
-        storeRefreshToken: true
-    };
-}
-
 function parseRefreshOptions(options: Partial<RefreshOptions>): RefreshOptions {
     const autoRefresh = (options.autoRefresh ?? "false") as string;
+    const storeRefreshToken = (options.storeRefreshToken ?? "false") as string;
     return {
+        storeRefreshToken: /true/.test(storeRefreshToken),
         autoRefresh: /true/.test(autoRefresh),
         interval: options.interval ?? 360000
     };

@@ -1,0 +1,14 @@
+{
+    "name": "plasticobs",
+    "private": true,
+    "dependencies": {
+        "@open-pioneer/authentication": "catalog:",
+        "@open-pioneer/chakra-integration": "catalog:",
+        "@open-pioneer/http": "catalog:",
+        "@open-pioneer/notifier": "catalog:",
+        "@open-pioneer/runtime": "catalog:",
+        "geonode-core": "workspace:^",
+        "geonode-auth": "workspace:^",
+        "geonode-user": "workspace:^"
+    }
+}

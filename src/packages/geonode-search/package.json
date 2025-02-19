@@ -1,5 +1,6 @@
 {
     "name": "geonode-search",
+    "version": "0.0.1",
     "private": true,
     "dependencies": {
         "@open-pioneer/http": "catalog:",

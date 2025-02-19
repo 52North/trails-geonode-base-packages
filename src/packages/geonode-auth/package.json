@@ -1,5 +1,5 @@
 {
-    "name": "geonode-core",
+    "name": "geonode-auth",
     "private": true,
     "main": "index.ts",
     "dependencies": {

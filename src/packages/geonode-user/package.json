@@ -1,21 +1,21 @@
 {
-    "name": "authentication-pkce",
+    "name": "geonode-user",
     "version": "0.0.1",
     "license": "Apache-2.0",
     "main": "index.ts",
     "keywords": [
         "open-pioneer-trails",
-        "oauth2-pkce"
+        "geonode"
     ],
     "private": true,
     "dependencies": {
         "@conterra/reactivity-core": "catalog:",
         "@open-pioneer/authentication": "catalog:",
         "@open-pioneer/core": "catalog:",
-        "@open-pioneer/local-storage": "catalog:",
         "@open-pioneer/notifier": "catalog:",
         "@open-pioneer/runtime": "catalog:",
-        "jwt-decode": "^4.0.0",
-        "pkce-challenge": "^4.1.0"
+        "geonode-core": "workspace:^",
+        "geonode-user": "workspace:^",
+        "authentication-pkce": "workspace:^"
     }
 }

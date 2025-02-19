@@ -3,12 +3,14 @@
 import { defineBuildConfig } from "@open-pioneer/build-support";
 
 export default defineBuildConfig({
+    i18n: ["en"],
     services: {
-        GeoNodeTokenInterceptor: {
-            provides: ["http.Interceptor"],
+        GeoNodeUserServiceImpl: {
+            provides: ["geonode-user.UserService"],
             references: {
                 authService: "authentication.AuthService",
-                configService: "geonode-core.ConfigService"
+                configService: "geonode-core.ConfigService",
+                httpClient: "http.HttpService"
             }
         }
     }

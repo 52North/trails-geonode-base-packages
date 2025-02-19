@@ -8,6 +8,7 @@ export default defineBuildConfig({
         PkceAuthPluginImpl: {
             provides: ["authentication.AuthPlugin"],
             references: {
+                storage: "local-storage.LocalStorageService",
                 notifier: "notifier.NotificationService"
             }
         }
@@ -15,6 +16,7 @@ export default defineBuildConfig({
     properties: {
         pkceOptions: {
             pkceConfig: null,
+            clientConfig: null,
             refreshOptions: null
         }
     }
