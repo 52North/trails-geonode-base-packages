@@ -7,8 +7,9 @@ import { GeoResultView } from "./GeoResultView";
 import { SearchView } from "./SearchView";
 
 export function AppUI() {
+    const basePath = `${import.meta.env.BASE_URL}samples/catalog/`;
     return (
-        <BrowserRouter basename="/samples/catalog/">
+        <BrowserRouter basename={basePath}>
             <Grid
                 templateAreas={`"header" "main" "footer"`}
                 gridTemplateRows={"50px 1fr 30px"}
@@ -23,8 +24,8 @@ export function AppUI() {
                 </GridItem>
                 <GridItem area={"main"} height="100%" overflow="hidden">
                     <Routes>
-                        <Route path="" element={<SearchView></SearchView>} />
-                        <Route path="georesult/:id" element={<GeoResultView></GeoResultView>} />
+                        <Route path="/" element={<SearchView></SearchView>} />
+                        <Route path="/georesult/:id" element={<GeoResultView></GeoResultView>} />
                     </Routes>
                 </GridItem>
                 <GridItem bg="blue.50" area={"footer"}>
