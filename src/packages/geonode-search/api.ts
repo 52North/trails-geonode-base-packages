@@ -214,6 +214,7 @@ export interface SearchFilter {
 export interface SearchService extends DeclaredService<"geonode-search.SearchService"> {
     searching: boolean;
     results: SearchResultEntry[] | undefined;
+    orderOptions: OrderOption[] | undefined;
     resultCount: number;
     currentFilter: SearchFilter;
     hasActiveFilter: boolean;
@@ -224,5 +225,4 @@ export interface SearchService extends DeclaredService<"geonode-search.SearchSer
     startSearch(): void;
     addNextPage(): void;
     clearAllFilter(): void;
-    getOrderOptions(): Promise<OrderOption[]>;
 }

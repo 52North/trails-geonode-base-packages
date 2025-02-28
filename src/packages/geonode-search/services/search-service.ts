@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2023 Open Pioneer project (https://github.com/open-pioneer)
 // SPDX-License-Identifier: Apache-2.0
 import { Reactive, reactive } from "@conterra/reactivity-core";
+import { NotificationService } from "@open-pioneer/notifier";
 import { ServiceOptions } from "@open-pioneer/runtime";
 import { CatalogService } from "geonode-catalog/api";
 import { GeoNodeConfigService } from "geonode-core";
-import { NotificationService } from "@open-pioneer/notifier";
-import { SearchResultEntry, SearchFilter, OrderOption, SearchService } from "../api";
+import { OrderOption, SearchFilter, SearchResultEntry, SearchService } from "../api";
 
 const URL_PARAM_SEARCH_TERM = "searchTerm";
 
@@ -23,6 +23,8 @@ export class SearchServiceImpl implements SearchService {
     #searching: Reactive<boolean> = reactive(false);
 
     #results: Reactive<SearchResultEntry[] | undefined> = reactive();
+
+    #orderOptions: Reactive<OrderOption[] | undefined> = reactive();
 
     #resultCount: Reactive<number> = reactive(0);
 
@@ -44,6 +46,10 @@ export class SearchServiceImpl implements SearchService {
 
     get results(): SearchResultEntry[] | undefined {
         return this.#results.value;
+    }
+
+    get orderOptions(): OrderOption[] | undefined {
+        return this.#orderOptions.value;
     }
 
     get resultCount(): number {
@@ -86,10 +92,6 @@ export class SearchServiceImpl implements SearchService {
             this.#currentFilter.page = this.#currentFilter.page + 1;
             this.triggerSearch(true);
         }
-    }
-
-    getOrderOptions(): Promise<OrderOption[]> {
-        return this.catalogSrvc.getOrderOptions();
     }
 
     startSearch(): void {
@@ -139,6 +141,8 @@ export class SearchServiceImpl implements SearchService {
             facets.forEach((facet) => facet.applyOfSearchParams(url.searchParams));
             this.triggerSearch();
         });
+
+        this.catalogSrvc.getOrderOptions().then((options) => (this.#orderOptions.value = options));
     }
 
     private setUrlParams() {
